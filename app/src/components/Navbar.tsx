@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
+import NotificationsBell from "@/components/NotificationsBell";
 import {
   Menu,
   X,
@@ -10,6 +11,7 @@ import {
   LayoutDashboard,
   GraduationCap,
   Award,
+  Target,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -24,6 +26,9 @@ export default function Navbar() {
     { path: "/", label: "الرئيسية" },
     { path: "/courses", label: "الكورسات" },
     { path: "/student-dashboard", label: "تقدمي" },
+    ...(isAuthenticated && !isAdmin
+      ? [{ path: "/habits", label: "عاداتي" }]
+      : []),
   ];
 
   return (
@@ -34,7 +39,10 @@ export default function Navbar() {
             <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
               <GraduationCap className="h-5 w-5 text-white" />
             </div>
-            <span className="text-xl font-bold text-slate-900">منصة عِلم</span>
+
+            <span className="text-xl font-bold text-slate-900">
+              أكاديمية الرواد
+            </span>
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
@@ -67,6 +75,8 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-3">
+            {isAuthenticated && <NotificationsBell />}
+
             {isAuthenticated && user ? (
               <div className="flex items-center gap-3">
                 {isAdmin && (
@@ -74,6 +84,15 @@ export default function Navbar() {
                     <Button variant="ghost" size="sm" className="text-slate-600">
                       <LayoutDashboard className="h-4 w-4 ml-2" />
                       لوحة التحكم
+                    </Button>
+                  </Link>
+                )}
+
+                {!isAdmin && (
+                  <Link to="/habits">
+                    <Button variant="ghost" size="sm" className="text-slate-600">
+                      <Target className="h-4 w-4 ml-2" />
+                      عاداتي
                     </Button>
                   </Link>
                 )}
@@ -109,6 +128,7 @@ export default function Navbar() {
                     تسجيل الدخول
                   </Button>
                 </Link>
+
                 <Link to="/register">
                   <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
                     حساب جديد
@@ -129,6 +149,12 @@ export default function Navbar() {
 
       {isOpen && (
         <div className="md:hidden border-t bg-white px-4 py-4 space-y-2 animate-fadeIn">
+          {isAuthenticated && (
+            <div className="px-2 py-2">
+              <NotificationsBell />
+            </div>
+          )}
+
           {navLinks.map((link) => (
             <Link
               key={link.path}
@@ -185,21 +211,13 @@ export default function Navbar() {
             </>
           ) : (
             <div className="flex gap-2 pt-2">
-              <Link
-                to="/login"
-                className="flex-1"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link to="/login" className="flex-1" onClick={() => setIsOpen(false)}>
                 <Button variant="outline" className="w-full">
                   تسجيل الدخول
                 </Button>
               </Link>
 
-              <Link
-                to="/register"
-                className="flex-1"
-                onClick={() => setIsOpen(false)}
-              >
+              <Link to="/register" className="flex-1" onClick={() => setIsOpen(false)}>
                 <Button className="w-full bg-blue-600">حساب جديد</Button>
               </Link>
             </div>

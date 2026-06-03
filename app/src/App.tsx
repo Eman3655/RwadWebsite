@@ -16,6 +16,10 @@ import NotFound from "./pages/NotFound";
 import Certificates from "./pages/Certificates";
 import AdminCertificates from "./pages/AdminCertificates";
 import StudentDashboard from "./pages/StudentDashboard";
+import AdminNotifications from "./pages/AdminNotifications";
+import Notifications from "./pages/Notifications";
+import Habits from "./pages/Habits";
+import AdminHabits from "./pages/AdminHabits";
 export default function App() {
   return (
     <Routes>
@@ -28,13 +32,17 @@ export default function App() {
       <Route path="/quizzes/:id" element={<QuizPage />} />
       <Route path="/profile" element={<Profile />} />
       <Route path="/student-dashboard" element={<StudentDashboard />} />
+      <Route path="/habits" element={<Habits />} />
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/dashboard/courses" element={<AdminCourses />} />
       <Route path="/dashboard/lessons" element={<AdminLessons />} />
       <Route path="/dashboard/quizzes" element={<AdminQuizzes />} />
+      <Route path="/dashboard/habits" element={<AdminHabits />} />
       <Route path="/dashboard/students" element={<AdminStudents />} />
       <Route path="/certificates" element={<Certificates />} />
       <Route path="/dashboard/certificates" element={<AdminCertificates />} />
+      <Route path="/dashboard/notifications" element={<AdminNotifications />} />
+      <Route path="/notifications" element={<Notifications />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

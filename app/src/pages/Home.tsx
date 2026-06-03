@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { motion, type Variants } from "framer-motion";
 import { trpc } from "@/providers/trpc";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,15 +9,16 @@ import Footer from "@/components/Footer";
 import {
   BookOpen,
   Users,
-  GraduationCap,
   Award,
-  Video,
   FileText,
   Clock,
   TrendingUp,
-  Play,
-  Star,
+  CheckCircle,
   ChevronLeft,
+  Star,
+  PlayCircle,
+  Layers,
+  ShieldCheck,
 } from "lucide-react";
 
 const levelLabels: Record<string, string> = {
@@ -27,8 +29,58 @@ const levelLabels: Record<string, string> = {
 
 const levelColors: Record<string, string> = {
   beginner: "bg-green-100 text-green-700",
-  intermediate: "bg-yellow-100 text-yellow-700",
-  advanced: "bg-red-100 text-red-700",
+  intermediate: "bg-orange-100 text-orange-700",
+  advanced: "bg-purple-100 text-purple-700",
+};
+
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  show: { opacity: 1, y: 0 },
+};
+
+const revealSection: Variants = {
+  hidden: { opacity: 0, y: 40 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.65, ease: "easeOut" },
+  },
+};
+
+const staggerContainer: Variants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.12,
+    },
+  },
+};
+
+const cardFromBottom: Variants = {
+  hidden: { opacity: 0, y: 35 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: "easeOut" },
+  },
+};
+
+const cardFromRight: Variants = {
+  hidden: { opacity: 0, x: 35 },
+  show: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.55, ease: "easeOut" },
+  },
+};
+
+const cardFromLeft: Variants = {
+  hidden: { opacity: 0, x: -35 },
+  show: {
+    opacity: 1,
+    x: 0,
+    transition: { duration: 0.55, ease: "easeOut" },
+  },
 };
 
 export default function Home() {
@@ -36,275 +88,572 @@ export default function Home() {
   const { data: coursesData } = trpc.course.list.useQuery({ limit: 6 });
   const courses = coursesData?.items ?? [];
 
-  const features = [
+  const statsCards = [
     {
-      icon: Video,
-      title: "دروس فيديو تفاعلية",
-      description: "شاهد دروس عالية الجودة مع إمكانية التحكم في السرعة والترجمة",
-    },
-    {
-      icon: FileText,
-      title: "محتوى تعليمي غني",
-      description: "ملفات PDF ومصادر تعليمية مصاحبة لكل درس",
-    },
-    {
-      icon: Clock,
-      title: "تعلم في وقتك",
-      description: "وصول 24/7 لجميع المواد التعليمية بدون قيود زمنية",
-    },
-    {
-      icon: TrendingUp,
-      title: "تتبع تقدمك",
-      description: "لوحة تحكم شخصية لمتابعة تقدمك الدراسي وإنجازاتك",
-    },
-    {
-      icon: Award,
-      title: "شهادات معتمدة",
-      description: "احصل على شهادات إلكترونية معتمدة عند إكمال الكورسات",
+      icon: BookOpen,
+      label: "كورس تعليمي",
+      value: stats?.courses ?? 0,
+      bg: "#E5F0FF",
+      text: "#1E40AF",
     },
     {
       icon: Users,
-      title: "مدربون محترفون",
-      description: "تعلم من نخبة المدربين والخبراء في مختلف المجالات",
+      label: "طالب مسجل",
+      value: stats?.students ?? 0,
+      bg: "#EAF7EE",
+      text: "#166534",
+    },
+    {
+      icon: FileText,
+      label: "تسجيل في كورس",
+      value: stats?.enrollments ?? 0,
+      bg: "#FFF4E5",
+      text: "#C2410C",
+    },
+    {
+      icon: Award,
+      label: "رحلة تعليمية",
+      value: stats?.enrollments ?? 0,
+      bg: "#F3E8FF",
+      text: "#7C3AED",
+    },
+  ];
+
+  const features = [
+    {
+      icon: PlayCircle,
+      title: "دروس واضحة ومنظمة",
+      description: "محتوى مرتب يساعد الطالب على التقدم خطوة بخطوة بدون تشتت.",
+    },
+    {
+      icon: TrendingUp,
+      title: "متابعة التقدم",
+      description: "لوحة خاصة للطالب تعرض مستوى الإنجاز والكورسات الحالية.",
+    },
+    {
+      icon: CheckCircle,
+      title: "اختبارات ونتائج",
+      description: "اختبارات بعد الدروس مع عرض النتيجة ومراجعة الإجابات.",
+    },
+    {
+      icon: Award,
+      title: "شهادات إلكترونية",
+      description: "إمكانية إصدار شهادات للطلاب بعد إكمال المتطلبات.",
+    },
+    {
+      icon: Layers,
+      title: "إدارة تعليمية مرنة",
+      description: "تنظيم الكورسات والدروس والاختبارات من لوحة تحكم واحدة.",
+    },
+    {
+      icon: ShieldCheck,
+      title: "تجربة آمنة وسهلة",
+      description: "حسابات طلابية واضحة وصلاحيات مناسبة لكل مستخدم.",
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 via-white to-slate-50">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
 
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-24 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 opacity-[0.97]" />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20 pb-16">
-          <Badge className="mb-6 bg-white/20 text-white border-white/30 hover:bg-white/30 text-sm px-4 py-1.5">
-            منصة التعلم الإلكتروني الرائدة
-          </Badge>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-            تعلم بلا حدود مع{" "}
-            <span className="text-amber-300">منصة عِلم</span>
-          </h1>
-          <p className="text-lg sm:text-xl text-blue-100 max-w-3xl mx-auto mb-10 leading-relaxed">
-            منصة تعليمية متكاملة توفر لك تجربة تعلم فريدة مع أفضل المدربين،
-            محتوى تعليمي غني، وشهادات معتمدة في مختلف المجالات
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/courses">
-              <Button
-                size="lg"
-                className="bg-white text-blue-700 hover:bg-blue-50 font-semibold text-lg px-8 py-6 shadow-xl"
+      <section className="relative overflow-hidden pt-28 pb-20">
+        <div className="absolute inset-0 bg-gradient-to-br from-[#E5F0FF] via-white to-[#F3E8FF]" />
+        <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-blue-200/40 blur-3xl" />
+        <div className="absolute top-40 -right-24 h-96 w-96 rounded-full bg-purple-200/40 blur-3xl" />
+
+        <motion.div
+          initial="hidden"
+          animate="show"
+          transition={{ staggerChildren: 0.1 }}
+          className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+        >
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <motion.h1
+                variants={fadeUp}
+                className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight"
               >
-                استكشف الكورسات
-                <ChevronLeft className="mr-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/register">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-white text-white hover:bg-white/20 font-semibold text-lg px-8 py-6"
+                تعلّم بوضوح مع
+                <span className="block text-blue-700 mt-2">
+                  أكاديمية الرواد
+                </span>
+              </motion.h1>
+
+              <motion.p
+                variants={fadeUp}
+                className="mt-6 text-lg text-slate-600 leading-8 max-w-xl"
               >
-                <Play className="mr-2 h-5 w-5" />
-                ابدأ رحلتك التعليمية
-              </Button>
-            </Link>
-          </div>
-        </div>
-        {/* Wave bottom */}
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-              d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-              fill="#F8FAFC"
-            />
-          </svg>
-        </div>
-      </section>
+                منصة تعليمية تساعد الطالب على متابعة الكورسات والدروس
+                والاختبارات والشهادات في مكان واحد، بتجربة هادئة ومنظمة.
+              </motion.p>
 
-      {/* Stats Section */}
-      <section className="py-16 -mt-2 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-            {[
-              { icon: BookOpen, label: "كورس تعليمي", value: stats?.courses ?? 0, color: "text-blue-600", bg: "bg-blue-50" },
-              { icon: Users, label: "طالب مسجل", value: stats?.students ?? 0, color: "text-emerald-600", bg: "bg-emerald-50" },
-              { icon: GraduationCap, label: "مدرب محترف", value: stats?.teachers ?? 0, color: "text-purple-600", bg: "bg-purple-50" },
-              { icon: Award, label: "شهادة معتمدة", value: stats?.enrollments ?? 0, color: "text-amber-600", bg: "bg-amber-50" },
-            ].map((stat, i) => (
-              <Card key={i} className="border-0 shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <CardContent className="p-6 text-center">
-                  <div className={`${stat.bg} w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-4`}>
-                    <stat.icon className={`h-7 w-7 ${stat.color}`} />
-                  </div>
-                  <div className="text-3xl font-bold text-slate-900 mb-1">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm text-slate-500">{stat.label}</div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Courses */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              الكورسات التعليمية
-            </h2>
-            <p className="text-slate-500 max-w-2xl mx-auto">
-              اختر من مجموعة واسعة من الكورسات في مختلف المجالات وابدأ رحلتك التعليمية اليوم
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {courses.map((course) => (
-              <Link key={course.id} to={`/courses/${course.id}`}>
-                <Card className="overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 h-full group">
-                  <div className="relative h-48 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center overflow-hidden">
-                    {course.image ? (
-                      <img
-                        src={course.image}
-                        alt={course.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    ) : (
-                      <div className="flex flex-col items-center text-white">
-                        <BookOpen className="h-16 w-16 mb-2 opacity-80" />
-                        <span className="text-lg font-semibold opacity-90">
-                          {course.categoryName || "عام"}
-                        </span>
-                      </div>
-                    )}
-                    <Badge
-                      className={`absolute top-3 right-3 ${levelColors[course.level]}`}
-                    >
-                      {levelLabels[course.level]}
-                    </Badge>
-                  </div>
-                  <CardContent className="p-5">
-                    <h3 className="text-lg font-bold text-slate-900 mb-2 line-clamp-1">
-                      {course.title}
-                    </h3>
-                    <p className="text-sm text-slate-500 mb-4 line-clamp-2">
-                      {course.description || "لا يوجد وصف"}
-                    </p>
-                    <div className="flex items-center justify-between text-sm text-slate-400">
-                      <div className="flex items-center gap-1">
-                        <Users className="h-4 w-4" />
-                        <span>{course.instructorName || "غير معروف"}</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
-                        <span>{course.duration} ساعة</span>
-                      </div>
-                    </div>
-                    <div className="mt-4 pt-4 border-t flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-amber-500">
-                        <Star className="h-4 w-4 fill-amber-500" />
-                        <span className="text-sm font-medium">
-                          {course.totalLessons} درس
-                        </span>
-                      </div>
-                      <span className="text-lg font-bold text-blue-600">
-                        {Number(course.price) === 0
-                          ? "مجاني"
-                          : `${course.price} $`}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
-
-          <div className="text-center mt-10">
-            <Link to="/courses">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-blue-600 text-blue-600 hover:bg-blue-50"
+              <motion.div
+                variants={fadeUp}
+                className="mt-8 flex flex-col sm:flex-row gap-4"
               >
-                عرض جميع الكورسات
-                <ChevronLeft className="mr-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Features Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              لماذا تختار منصة عِلم؟
-            </h2>
-            <p className="text-slate-500 max-w-2xl mx-auto">
-              نقدم لك تجربة تعليمية متكاملة مع أفضل المميزات والخدمات
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, i) => (
-              <div
-                key={i}
-                className="p-6 rounded-2xl bg-slate-50 hover:bg-blue-50 transition-colors duration-300 group"
-              >
-                <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-5 group-hover:bg-blue-200 transition-colors">
-                  <feature.icon className="h-7 w-7 text-blue-600" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-900 mb-3">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-slate-500 leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-10 lg:p-16 text-center text-white relative overflow-hidden">
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-30" />
-            <div className="relative">
-              <h2 className="text-3xl font-bold mb-4">
-                ابدأ رحلتك التعليمية اليوم
-              </h2>
-              <p className="text-blue-100 text-lg mb-8 max-w-2xl mx-auto">
-                انضم لآلاف المتعلمين واكتسب مهارات جديدة مع أفضل الكورسات والمدربين
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/register">
-                  <Button
-                    size="lg"
-                    className="bg-white text-blue-700 hover:bg-blue-50 font-semibold text-lg px-8"
-                  >
-                    سجل حساب جديد
-                    <ChevronLeft className="mr-2 h-5 w-5" />
-                  </Button>
-                </Link>
                 <Link to="/courses">
                   <Button
                     size="lg"
-                    variant="outline"
-                    className="border-white text-white hover:bg-white/20 font-semibold text-lg px-8"
+                    className="bg-blue-700 hover:bg-blue-800 rounded-2xl px-8 h-14 text-base shadow-lg"
                   >
-                    تصفح الكورسات
+                    استكشف الكورسات
+                    <ChevronLeft className="h-5 w-5 mr-2" />
                   </Button>
                 </Link>
-              </div>
+
+                <Link to="/register">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="rounded-2xl px-8 h-14 text-base bg-white/80"
+                  >
+                    ابدأ الآن
+                  </Button>
+                </Link>
+              </motion.div>
             </div>
+
+            <motion.div variants={fadeUp} className="relative hidden lg:block">
+              <div className="relative">
+                <div className="absolute -top-6 -right-6 w-72 h-72 bg-blue-300/30 blur-3xl rounded-full" />
+                <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-purple-300/30 blur-3xl rounded-full" />
+
+                <div className="relative bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden">
+                  <div className="h-14 bg-slate-50 border-b flex items-center px-5 gap-2">
+                    <div className="w-3 h-3 rounded-full bg-red-400" />
+                    <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                    <div className="w-3 h-3 rounded-full bg-green-400" />
+                  </div>
+
+                  <div className="p-6 bg-gradient-to-br from-slate-50 to-blue-50">
+                    <div className="grid grid-cols-2 gap-4 mb-5">
+                      <div className="bg-white rounded-2xl p-5 shadow-sm border">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-slate-400 text-sm">
+                              الكورسات
+                            </div>
+                            <div className="text-3xl font-extrabold mt-2 text-slate-900">
+                              {stats?.courses ?? 0}
+                            </div>
+                          </div>
+
+                          <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
+                            <BookOpen className="h-6 w-6 text-blue-700" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-2xl p-5 shadow-sm border">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-slate-400 text-sm">
+                              الطلاب
+                            </div>
+                            <div className="text-3xl font-extrabold mt-2 text-slate-900">
+                              {stats?.students ?? 0}
+                            </div>
+                          </div>
+
+                          <div className="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center">
+                            <Users className="h-6 w-6 text-purple-700" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-3xl border shadow-sm p-5">
+                      <div className="flex items-center justify-between mb-5">
+                        <div>
+                          <div className="font-bold text-slate-900">
+                            تقدم الطالب
+                          </div>
+                          <div className="text-sm text-slate-400 mt-1">
+                            متابعة الإنجاز التعليمي
+                          </div>
+                        </div>
+
+                        <div className="text-blue-700 font-bold">78%</div>
+                      </div>
+
+                      <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
+                        <div className="h-full w-[78%] bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full" />
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-3 mt-6">
+                        {[
+                          { value: "12", label: "درس" },
+                          { value: "4", label: "اختبارات" },
+                          { value: "2", label: "شهادات" },
+                        ].map((item) => (
+                          <div
+                            key={item.label}
+                            className="rounded-2xl bg-slate-50 p-4 text-center"
+                          >
+                            <div className="text-xl font-bold text-slate-900">
+                              {item.value}
+                            </div>
+                            <div className="text-xs text-slate-400 mt-1">
+                              {item.label}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </section>
+
+      <motion.section
+        variants={revealSection}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        className="-mt-8 relative z-10 pb-14"
+      >
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.2 }}
+            className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+          >
+            {statsCards.map((stat, index) => {
+              const Icon = stat.icon;
+
+              return (
+                <motion.div
+                  key={stat.label}
+                  variants={index % 2 === 0 ? cardFromRight : cardFromLeft}
+                >
+                  <Card className="border-0 shadow-md rounded-3xl">
+                    <CardContent className="p-5 text-center">
+                      <div
+                        className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-3"
+                        style={{
+                          backgroundColor: stat.bg,
+                          color: stat.text,
+                        }}
+                      >
+                        <Icon className="h-7 w-7" />
+                      </div>
+
+                      <div className="text-3xl font-extrabold text-slate-900">
+                        {stat.value}
+                      </div>
+
+                      <div className="text-sm text-slate-500 mt-1">
+                        {stat.label}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </motion.section>
+
+      <motion.section
+        variants={revealSection}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.18 }}
+        className="py-14"
+      >
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            variants={cardFromBottom}
+            className="flex items-end justify-between gap-4 mb-8"
+          >
+            <div>
+              <h2 className="text-3xl font-extrabold text-slate-900">
+                أحدث الكورسات
+              </h2>
+              <p className="text-slate-500 mt-2">
+                اختر الكورس المناسب وابدأ رحلتك التعليمية.
+              </p>
+            </div>
+
+            <Link to="/courses" className="hidden sm:block">
+              <Button variant="outline" className="rounded-2xl bg-white">
+                عرض الكل
+                <ChevronLeft className="h-4 w-4 mr-2" />
+              </Button>
+            </Link>
+          </motion.div>
+
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.15 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {courses.map((course, index) => (
+              <motion.div
+                key={course.id}
+                variants={
+                  index % 3 === 0
+                    ? cardFromRight
+                    : index % 3 === 1
+                      ? cardFromBottom
+                      : cardFromLeft
+                }
+              >
+                <Link to={`/courses/${course.id}`}>
+                  <Card className="overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-3xl h-full bg-white">
+                    <div className="relative h-48 bg-gradient-to-br from-blue-500 to-indigo-600">
+                      {course.image ? (
+                        <img
+                          src={course.image}
+                          alt={course.title}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-full flex flex-col items-center justify-center text-white">
+                          <BookOpen className="h-14 w-14 mb-2 opacity-90" />
+                          <span className="font-semibold">
+                            {course.categoryName || "قسم عام"}
+                          </span>
+                        </div>
+                      )}
+
+                      <Badge
+                        className={`absolute top-4 right-4 rounded-full ${
+                          levelColors[course.level] ?? levelColors.beginner
+                        }`}
+                      >
+                        {levelLabels[course.level] ?? "مبتدئ"}
+                      </Badge>
+                    </div>
+
+                    <CardContent className="p-5">
+                      <h3 className="text-lg font-bold text-slate-900 line-clamp-1">
+                        {course.title}
+                      </h3>
+
+                      <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-6">
+                        {course.description || "وصف الكورس غير متوفر حالياً."}
+                      </p>
+
+                      <div className="flex items-center justify-between mt-5 text-sm text-slate-500">
+                        <div className="flex items-center gap-1">
+                          <Layers className="h-4 w-4" />
+                          <span>{course.categoryName || "قسم عام"}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <Clock className="h-4 w-4" />
+                          <span>{course.duration} ساعة</span>
+                        </div>
+                      </div>
+
+                      <div className="mt-5 pt-4 border-t flex items-center justify-between">
+                        <div className="flex items-center gap-1 text-amber-500">
+                          <Star className="h-4 w-4 fill-amber-500" />
+                          <span className="text-sm font-medium">
+                            {course.totalLessons} درس
+                          </span>
+                        </div>
+
+                        <span className="font-bold text-blue-700">
+                          {Number(course.price) === 0
+                            ? "مجاني"
+                            : `${course.price} $`}
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {courses.length === 0 && (
+            <Card className="border-0 shadow-sm rounded-3xl">
+              <CardContent className="p-12 text-center text-slate-400">
+                لا توجد كورسات متاحة حالياً
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </motion.section>
+
+      <motion.section
+        variants={revealSection}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        className="py-16 bg-white"
+      >
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div variants={cardFromBottom} className="text-center mb-10">
+            <h2 className="text-3xl font-extrabold text-slate-900">
+              لماذا أكاديمية الرواد؟
+            </h2>
+            <p className="text-slate-500 mt-3">
+              تجربة تعليمية بسيطة، منظمة، ومناسبة للطلاب.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.18 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+          >
+            {features.map((feature, index) => {
+              const Icon = feature.icon;
+
+              return (
+                <motion.div
+                  key={feature.title}
+                  variants={
+                    index % 3 === 0
+                      ? cardFromRight
+                      : index % 3 === 1
+                        ? cardFromBottom
+                        : cardFromLeft
+                  }
+                  className="rounded-3xl bg-slate-50 border border-slate-100 p-6 hover:bg-blue-50 transition"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 text-blue-700">
+                    <Icon className="h-6 w-6" />
+                  </div>
+
+                  <h3 className="font-bold text-slate-900 text-lg">
+                    {feature.title}
+                  </h3>
+
+                  <p className="text-sm text-slate-500 mt-2 leading-7">
+                    {feature.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+        </div>
+      </motion.section>
+
+      <motion.section
+        variants={revealSection}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, amount: 0.2 }}
+        className="py-16 bg-white"
+      >
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div variants={cardFromBottom} className="text-center mb-10">
+            <h2 className="text-3xl font-extrabold text-slate-900">
+              ابدأ بخطوات بسيطة
+            </h2>
+            <p className="text-slate-500 mt-3">
+              تجربة تعليمية واضحة من التسجيل حتى الحصول على الشهادة.
+            </p>
+          </motion.div>
+
+          <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.2 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-5"
+          >
+            {[
+              {
+                step: "01",
+                title: "أنشئ حسابك",
+                description: "سجّل كطالب وابدأ رحلتك التعليمية خلال دقائق.",
+                icon: Users,
+                bg: "#E5F0FF",
+                text: "#1E40AF",
+              },
+              {
+                step: "02",
+                title: "اختر الكورس",
+                description: "تصفح الكورسات المتاحة واختر ما يناسب هدفك.",
+                icon: BookOpen,
+                bg: "#F3E8FF",
+                text: "#7C3AED",
+              },
+              {
+                step: "03",
+                title: "تابع تقدمك",
+                description:
+                  "أكمل الدروس والاختبارات وشاهد شهاداتك من حسابك.",
+                icon: Award,
+                bg: "#EAF7EE",
+                text: "#166534",
+              },
+            ].map((item, index) => {
+              const Icon = item.icon;
+
+              return (
+                <motion.div
+                  key={item.step}
+                  variants={
+                    index === 0
+                      ? cardFromRight
+                      : index === 1
+                        ? cardFromBottom
+                        : cardFromLeft
+                  }
+                  className="rounded-[2rem] border border-slate-100 bg-slate-50 p-6 hover:bg-white hover:shadow-lg transition"
+                >
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
+                    style={{ backgroundColor: item.bg, color: item.text }}
+                  >
+                    <Icon className="h-7 w-7" />
+                  </div>
+
+                  <div
+                    className="text-sm font-bold mb-3"
+                    style={{ color: item.text }}
+                  >
+                    الخطوة {item.step}
+                  </div>
+
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">
+                    {item.title}
+                  </h3>
+
+                  <p className="text-sm text-slate-500 leading-7">
+                    {item.description}
+                  </p>
+                </motion.div>
+              );
+            })}
+          </motion.div>
+
+          <motion.div
+            variants={cardFromBottom}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.3 }}
+            className="flex justify-center gap-3 mt-10"
+          >
+            <Link to="/register">
+              <Button className="bg-blue-700 hover:bg-blue-800 rounded-2xl px-8">
+                إنشاء حساب
+              </Button>
+            </Link>
+
+            <Link to="/courses">
+              <Button variant="outline" className="rounded-2xl px-8 bg-white">
+                تصفح الكورسات
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </motion.section>
 
       <Footer />
     </div>

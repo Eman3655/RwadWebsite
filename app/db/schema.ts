@@ -209,3 +209,20 @@ export const notifications = mysqlTable("notifications", {
 
 export type SelectNotification = typeof notifications.$inferSelect;
 export type InsertNotification = typeof notifications.$inferInsert;
+
+
+export const habits = mysqlTable("habits", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("user_id").notNull(),
+  title: varchar("title", { length: 100 }).notNull(),
+  description: text("description"),
+  goalDays: int("goal_days").notNull().default(7),
+  currentStreak: int("current_streak").notNull().default(0),
+  lastCompletedAt: timestamp("last_completed_at"),
+  source: mysqlEnum("source", ["admin", "student"]).default("student").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type SelectHabit = typeof habits.$inferSelect;
+export type InsertHabit = typeof habits.$inferInsert;

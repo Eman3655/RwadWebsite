@@ -17,6 +17,8 @@ import {
   TrendingUp,
   Award,
   Eye,
+  Bell,
+  Target,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -142,6 +144,8 @@ export default function Dashboard() {
             { label: "إدارة الاختبارات", link: "/dashboard/quizzes", icon: HelpCircle },
             { label: "إدارة الطلاب", link: "/dashboard/students", icon: Users },
             { label: "إدارة الشهادات", link: "/dashboard/certificates", icon: Award },
+            { label: "إدارة الإشعارات", link: "/dashboard/notifications", icon: Bell },
+            { label: "إدارة العادات", link: "/dashboard/habits", icon: Target },
           ].map((action) => (
             <Link key={action.link} to={action.link}>
               <Button variant="outline" className="bg-white hover:bg-blue-50 whitespace-nowrap">
