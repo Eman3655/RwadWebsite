@@ -4,11 +4,47 @@ import { getDb } from "./queries/connection";
 import { lessons, lessonProgress, enrollments, courses } from "@db/schema";
 import { eq, and, asc } from "drizzle-orm";
 
+async function recalculateCourseProgress(enrollmentId: number, courseId: number) {
+  const db = getDb();
+
+  const allLessons = await db
+    .select()
+    .from(lessons)
+    .where(eq(lessons.courseId, courseId));
+
+  const completedLessons = await db
+    .select()
+    .from(lessonProgress)
+    .where(
+      and(
+        eq(lessonProgress.enrollmentId, enrollmentId),
+        eq(lessonProgress.isCompleted, true),
+      ),
+    );
+
+  const progress =
+    allLessons.length > 0
+      ? Math.round((completedLessons.length / allLessons.length) * 100)
+      : 0;
+
+  await db
+    .update(enrollments)
+    .set({
+      progress,
+      status: progress === 100 ? "completed" : "active",
+      completedAt: progress === 100 ? new Date() : null,
+    })
+    .where(eq(enrollments.id, enrollmentId));
+
+  return progress;
+}
+
 export const lessonRouter = createRouter({
   list: publicQuery
     .input(z.object({ courseId: z.number() }))
     .query(async ({ input }) => {
       const db = getDb();
+
       return db
         .select()
         .from(lessons)
@@ -20,11 +56,13 @@ export const lessonRouter = createRouter({
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const db = getDb();
+
       const rows = await db
         .select()
         .from(lessons)
         .where(eq(lessons.id, input.id))
         .limit(1);
+
       return rows.at(0) ?? null;
     }),
 
@@ -44,9 +82,9 @@ export const lessonRouter = createRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
+
       const result = await db.insert(lessons).values(input);
 
-      // Update course totalLessons
       const lessonCount = await db
         .select()
         .from(lessons)
@@ -77,7 +115,9 @@ export const lessonRouter = createRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
       const { id, ...data } = input;
+
       await db.update(lessons).set(data).where(eq(lessons.id, id));
+
       return { success: true };
     }),
 
@@ -85,6 +125,7 @@ export const lessonRouter = createRouter({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = getDb();
+
       const lesson = await db
         .select()
         .from(lessons)
@@ -94,7 +135,6 @@ export const lessonRouter = createRouter({
       if (lesson.length > 0) {
         await db.delete(lessons).where(eq(lessons.id, input.id));
 
-        // Update course totalLessons
         const lessonCount = await db
           .select()
           .from(lessons)
@@ -114,14 +154,15 @@ export const lessonRouter = createRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
 
-      // Find enrollment for this lesson's course
       const lesson = await db
         .select()
         .from(lessons)
         .where(eq(lessons.id, input.lessonId))
         .limit(1);
 
-      if (lesson.length === 0) throw new Error("Lesson not found");
+      if (lesson.length === 0) {
+        throw new Error("Lesson not found");
+      }
 
       const enrollment = await db
         .select()
@@ -134,7 +175,9 @@ export const lessonRouter = createRouter({
         )
         .limit(1);
 
-      if (enrollment.length === 0) throw new Error("Not enrolled in this course");
+      if (enrollment.length === 0) {
+        throw new Error("Not enrolled in this course");
+      }
 
       const existingProgress = await db
         .select()
@@ -150,7 +193,10 @@ export const lessonRouter = createRouter({
       if (existingProgress.length > 0) {
         await db
           .update(lessonProgress)
-          .set({ isCompleted: true, completedAt: new Date() })
+          .set({
+            isCompleted: true,
+            completedAt: new Date(),
+          })
           .where(eq(lessonProgress.id, existingProgress[0].id));
       } else {
         await db.insert(lessonProgress).values({
@@ -162,36 +208,86 @@ export const lessonRouter = createRouter({
         });
       }
 
-      // Calculate and update overall progress
-      const allLessons = await db
+      const progress = await recalculateCourseProgress(
+        enrollment[0].id,
+        lesson[0].courseId,
+      );
+
+      return { success: true, completed: true, progress };
+    }),
+
+  toggleComplete: authedQuery
+    .input(z.object({ lessonId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+
+      const lesson = await db
         .select()
         .from(lessons)
-        .where(eq(lessons.courseId, lesson[0].courseId));
+        .where(eq(lessons.id, input.lessonId))
+        .limit(1);
 
-      const completedLessons = await db
+      if (lesson.length === 0) {
+        throw new Error("Lesson not found");
+      }
+
+      const enrollment = await db
+        .select()
+        .from(enrollments)
+        .where(
+          and(
+            eq(enrollments.studentId, ctx.user.id),
+            eq(enrollments.courseId, lesson[0].courseId),
+          ),
+        )
+        .limit(1);
+
+      if (enrollment.length === 0) {
+        throw new Error("Not enrolled in this course");
+      }
+
+      const existingProgress = await db
         .select()
         .from(lessonProgress)
         .where(
           and(
             eq(lessonProgress.enrollmentId, enrollment[0].id),
-            eq(lessonProgress.isCompleted, true),
+            eq(lessonProgress.lessonId, input.lessonId),
           ),
-        );
+        )
+        .limit(1);
 
-      const progress = Math.round(
-        (completedLessons.length / allLessons.length) * 100,
+      let completed = true;
+
+      if (existingProgress.length > 0) {
+        completed = !existingProgress[0].isCompleted;
+
+        await db
+          .update(lessonProgress)
+          .set({
+            isCompleted: completed,
+            completedAt: completed ? new Date() : null,
+            isLocked: false,
+          })
+          .where(eq(lessonProgress.id, existingProgress[0].id));
+      } else {
+        completed = true;
+
+        await db.insert(lessonProgress).values({
+          enrollmentId: enrollment[0].id,
+          lessonId: input.lessonId,
+          isCompleted: true,
+          isLocked: false,
+          completedAt: new Date(),
+        });
+      }
+
+      const progress = await recalculateCourseProgress(
+        enrollment[0].id,
+        lesson[0].courseId,
       );
 
-      await db
-        .update(enrollments)
-        .set({
-          progress,
-          status: progress === 100 ? "completed" : "active",
-          completedAt: progress === 100 ? new Date() : null,
-        })
-        .where(eq(enrollments.id, enrollment[0].id));
-
-      return { success: true, progress };
+      return { success: true, completed, progress };
     }),
 
   getProgress: authedQuery

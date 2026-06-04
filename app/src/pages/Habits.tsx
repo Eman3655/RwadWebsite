@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { trpc } from "@/providers/trpc";
+import Navbar from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -15,20 +16,12 @@ import {
   Trash2,
   Target,
   Sparkles,
-  X,
+  Loader2,
 } from "lucide-react";
 import {
   celebrateDoneToday,
   celebrateGoalAchieved,
 } from "@/utils/celebrations";
-
-function progressColor(progress: number) {
-  if (progress >= 100) return "from-emerald-500 to-green-600";
-  if (progress >= 70) return "from-blue-600 to-indigo-600";
-  if (progress >= 40) return "from-amber-400 to-orange-500";
-  return "from-rose-400 to-red-500";
-}
-
 
 function isDoneToday(value?: string | Date | null) {
   if (!value) return false;
@@ -42,6 +35,18 @@ function isDoneToday(value?: string | Date | null) {
     date.getDate() === today.getDate()
   );
 }
+
+function progressColor(progress: number) {
+  if (progress >= 100) return "bg-green-600";
+  if (progress >= 70) return "bg-blue-600";
+  if (progress >= 40) return "bg-orange-500";
+  return "bg-red-500";
+}
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0 },
+};
 
 export default function Habits() {
   const utils = trpc.useUtils();
@@ -85,176 +90,289 @@ export default function Habits() {
     if (!title.trim()) return;
 
     createHabit.mutate({
-      title,
-      description,
+      title: title.trim(),
+      description: description.trim(),
       goalDays,
     });
   };
 
+  const totalHabits = habits.length;
+
+  const doneTodayCount = habits.filter((habit) =>
+    isDoneToday(habit.lastCompletedAt),
+  ).length;
+
+  const completedGoals = habits.filter(
+    (habit) => habit.currentStreak >= habit.goalDays,
+  ).length;
+
   return (
-    <div className="min-h-screen bg-slate-50 py-10">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-4xl font-extrabold text-slate-900">
-              العادات اليومية
-            </h1>
-            <p className="text-slate-500 mt-3">
-              تابع عاداتك اليومية والتزم بها حتى تحقق هدفك.
-            </p>
-          </div>
+    <div className="min-h-screen bg-[#F8FAFC]">
+      <Navbar />
 
-          <Button
-            onClick={() => setOpen(true)}
-            className="rounded-2xl bg-blue-700 hover:bg-blue-800 h-12 px-6"
+      <motion.div
+        initial="hidden"
+        animate="show"
+        transition={{ staggerChildren: 0.07 }}
+        className="pt-24 pb-12"
+      >
+        <div className="max-w-7xl mx-auto px-4">
+          <motion.div
+            variants={fadeUp}
+            className="rounded-[2rem] border shadow-sm p-6 md:p-8 mb-6 relative overflow-hidden"
+            style={{
+              background:
+                "linear-gradient(135deg, #E5F0FF 0%, #F3E8FF 55%, #EAF7EE 100%)",
+              borderColor: "#D8B4FE",
+            }}
           >
-            <Plus className="h-5 w-5 ml-2" />
-            إضافة عادة
-          </Button>
-        </div>
+            <div className="absolute -top-16 -left-16 w-52 h-52 bg-white/40 rounded-full blur-2xl" />
+            <div className="absolute -bottom-20 -right-12 w-64 h-64 bg-white/40 rounded-full blur-2xl" />
 
-        {isLoading ? (
-          <div className="text-center py-20 text-slate-400">
-            جاري التحميل...
+            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+              <div>
+                <div className="inline-flex items-center gap-2 bg-white/70 border border-white px-3 py-1 rounded-full text-sm text-blue-700 mb-4">
+                  <Target className="h-4 w-4" />
+                  مساحة الالتزام اليومية
+                </div>
+
+                <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900">
+                  العادات اليومية
+                </h1>
+
+                <p className="text-slate-600 mt-3 max-w-xl">
+                  تابع عاداتك اليومية وسجّل إنجازك حتى تحقق هدفك.
+                </p>
+              </div>
+
+              <Button
+                onClick={() => setOpen(true)}
+                className="rounded-2xl bg-blue-700 hover:bg-blue-800 h-11 px-5"
+              >
+                <Plus className="h-5 w-5 ml-2" />
+                إضافة عادة
+              </Button>
+            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <motion.div variants={fadeUp}>
+              <div className="rounded-3xl border bg-blue-50 border-blue-100 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-blue-700">
+                    <Target className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <div className="text-2xl font-extrabold text-blue-700">
+                      {totalHabits}
+                    </div>
+                    <div className="text-sm text-blue-700">إجمالي العادات</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div variants={fadeUp}>
+              <div className="rounded-3xl border bg-green-50 border-green-100 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-green-700">
+                    <CheckCircle2 className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <div className="text-2xl font-extrabold text-green-700">
+                      {doneTodayCount}
+                    </div>
+                    <div className="text-sm text-green-700">
+                      تم إنجازها اليوم
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div variants={fadeUp}>
+              <div className="rounded-3xl border bg-purple-50 border-purple-100 p-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center text-purple-700">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <div className="text-2xl font-extrabold text-purple-700">
+                      {completedGoals}
+                    </div>
+                    <div className="text-sm text-purple-700">أهداف مكتملة</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
-        ) : habits.length === 0 ? (
-          <div className="bg-white rounded-[2rem] border p-14 text-center">
-            <Sparkles className="h-14 w-14 text-blue-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-slate-900">
-              لا توجد عادات بعد
-            </h2>
-            <p className="text-slate-500 mt-2">
-              أضف عادة جديدة وابدأ الالتزام من اليوم.
-            </p>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-5">
-            {habits.map((habit, index) => {
-              const progress = Math.min(
-                Math.round((habit.currentStreak / habit.goalDays) * 100),
-                100,
-              );
 
-              const completed = habit.currentStreak >= habit.goalDays;
-              const doneToday = isDoneToday(habit.lastCompletedAt);
+          {isLoading ? (
+            <div className="flex items-center justify-center py-20 text-slate-400">
+              <Loader2 className="h-7 w-7 animate-spin text-blue-600" />
+            </div>
+          ) : habits.length === 0 ? (
+            <motion.div
+              variants={fadeUp}
+              className="bg-white rounded-[2rem] border p-10 text-center shadow-sm"
+            >
+              <Sparkles className="h-12 w-12 text-blue-500 mx-auto mb-4" />
 
-              return (
-                <motion.div
-                  key={habit.id}
-                  initial={{ opacity: 0, y: 24 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.05 }}
-                  className="bg-white rounded-[2rem] border shadow-sm p-5 hover:shadow-md transition"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-2xl font-bold text-slate-900">
+                لا توجد عادات بعد
+              </h2>
+
+              <p className="text-slate-500 mt-2 mb-6">
+                أضف عادة جديدة وابدأ الالتزام من اليوم.
+              </p>
+
+              <Button
+                onClick={() => setOpen(true)}
+                className="bg-blue-700 hover:bg-blue-800 rounded-2xl"
+              >
+                <Plus className="h-4 w-4 ml-2" />
+                إضافة عادة
+              </Button>
+            </motion.div>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {habits.map((habit, index) => {
+                const progress = Math.min(
+                  Math.round((habit.currentStreak / habit.goalDays) * 100),
+                  100,
+                );
+
+                const completed = habit.currentStreak >= habit.goalDays;
+                const doneToday = isDoneToday(habit.lastCompletedAt);
+
+                return (
+                  <motion.div
+                    key={habit.id}
+                    variants={fadeUp}
+                    transition={{ delay: index * 0.035 }}
+                    className="bg-white rounded-3xl border shadow-sm p-4 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <h2 className="text-lg font-bold text-slate-900 line-clamp-1">
                           {habit.title}
                         </h2>
 
-                        {habit.source === "admin" && (
-                          <span className="px-2.5 py-1 rounded-full bg-purple-100 text-purple-700 text-xs font-semibold">
-                            من الإدارة
-                          </span>
-                        )}
+                        <div className="mt-2 flex items-center gap-2 flex-wrap">
+                          {habit.source === "admin" && (
+                            <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[11px] font-semibold">
+                              من الإدارة
+                            </span>
+                          )}
+
+                          {doneToday && !completed && (
+                            <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-semibold">
+                              منجز اليوم
+                            </span>
+                          )}
+
+                          {completed && (
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold">
+                              مكتمل
+                            </span>
+                          )}
+                        </div>
                       </div>
 
-                      {habit.description && (
-                        <p className="text-sm text-slate-500 mt-2 leading-6 line-clamp-2">
-                          {habit.description}
-                        </p>
-                      )}
+                      <button
+                        onClick={() => {
+                          if (confirm("هل تريد حذف هذه العادة؟")) {
+                            deleteHabit.mutate({ id: habit.id });
+                          }
+                        }}
+                        className="w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 flex items-center justify-center shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </button>
                     </div>
 
-                    <button
-                      onClick={() => deleteHabit.mutate({ id: habit.id })}
-                      className="w-10 h-10 rounded-2xl bg-red-50 hover:bg-red-100 flex items-center justify-center"
+                    {habit.description && (
+                      <p className="text-xs text-slate-500 mt-3 leading-5 line-clamp-2 min-h-[40px]">
+                        {habit.description}
+                      </p>
+                    )}
+
+<div className="mt-4">
+  <div className="flex items-center justify-between mb-2">
+    <span className="text-xs font-semibold text-slate-500">
+      التقدم
+    </span>
+
+    <span className="text-xs font-bold text-slate-900">
+      {progress}%
+    </span>
+  </div>
+
+  <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+    <motion.div
+      initial={{ width: 0 }}
+      animate={{ width: `${progress}%` }}
+      transition={{ duration: 0.6 }}
+      className={`h-full rounded-full ${progressColor(progress)}`}
+    />
+  </div>
+</div>
+
+                    <div className="flex gap-2 mt-4">
+                      <div className="flex-1 rounded-xl bg-orange-50 p-2 text-center">
+                        <Flame className="h-4 w-4 text-orange-500 mx-auto mb-1" />
+                        <div className="text-base font-extrabold text-slate-900">
+                          {habit.currentStreak}
+                        </div>
+                        <div className="text-[11px] text-slate-500">
+                          متتالية
+                        </div>
+                      </div>
+
+                      <div className="flex-1 rounded-xl bg-blue-50 p-2 text-center">
+                        <Target className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+                        <div className="text-base font-extrabold text-slate-900">
+                          {habit.goalDays}
+                        </div>
+                        <div className="text-[11px] text-slate-500">الهدف</div>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={() => {
+                        if (!completed && !doneToday && !markDone.isPending) {
+                          markDone.mutate({ id: habit.id });
+                        }
+                      }}
+                      disabled={completed || doneToday || markDone.isPending}
+                      className={`mt-4 w-full h-10 rounded-2xl text-sm font-bold transition ${
+                        completed
+                          ? "bg-green-100 text-green-700 hover:bg-green-100 cursor-not-allowed"
+                          : doneToday
+                            ? "bg-slate-200 text-slate-500 hover:bg-slate-200 cursor-not-allowed"
+                            : markDone.isPending
+                              ? "bg-blue-300 text-white cursor-not-allowed"
+                              : "bg-blue-700 hover:bg-blue-800 text-white"
+                      }`}
                     >
-                      <Trash2 className="h-5 w-5 text-red-600" />
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-2 mt-5">
-                    <div className="rounded-2xl bg-orange-50 p-3 text-center">
-                      <Flame className="h-5 w-5 text-orange-500 mx-auto mb-1" />
-                      <div className="text-xl font-extrabold">
-                        {habit.currentStreak}
-                      </div>
-                      <div className="text-xs text-slate-500">متتالية</div>
-                    </div>
-
-                    <div className="rounded-2xl bg-blue-50 p-3 text-center">
-                      <Target className="h-5 w-5 text-blue-600 mx-auto mb-1" />
-                      <div className="text-xl font-extrabold">
-                        {habit.goalDays}
-                      </div>
-                      <div className="text-xs text-slate-500">الهدف</div>
-                    </div>
-
-                    <div className="rounded-2xl bg-green-50 p-3 text-center">
-                      <CheckCircle2 className="h-5 w-5 text-green-600 mx-auto mb-1" />
-                      <div className="text-xl font-extrabold">
-                        {progress}%
-                      </div>
-                      <div className="text-xs text-slate-500">إنجاز</div>
-                    </div>
-                  </div>
-
-                  <div className="mt-5">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-semibold text-slate-600">
-                        التقدم
-                      </span>
-                      <span className="text-sm font-bold text-slate-900">
-                        {habit.currentStreak} / {habit.goalDays}
-                      </span>
-                    </div>
-
-                    <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${progress}%` }}
-                        transition={{ duration: 0.7 }}
-                        className={`h-full rounded-full bg-gradient-to-r ${progressColor(
-                          progress,
-                        )}`}
-                      />
-                    </div>
-                  </div>
-<Button
-  onClick={() => {
-    if (!completed && !doneToday && !markDone.isPending) {
-      markDone.mutate({ id: habit.id });
-      celebrateDoneToday();
-    }
-  }}
-  disabled={completed || doneToday || markDone.isPending}
-  className={`mt-8 w-full h-12 rounded-2xl font-bold transition ${
-    completed
-      ? "bg-green-100 text-green-700 hover:bg-green-100 cursor-not-allowed"
-      : doneToday
-        ? "bg-slate-200 text-slate-500 hover:bg-slate-200 cursor-not-allowed"
-        : markDone.isPending
-          ? "bg-blue-300 text-white cursor-not-allowed"
-          : "bg-blue-700 hover:bg-blue-800 text-white"
-  }`}
->
-  {completed
-    ? "تم تحقيق الهدف 🎉"
-    : doneToday
-      ? "تم تسجيل إنجاز اليوم"
-      : markDone.isPending
-        ? "جاري التسجيل..."
-        : "تسجيل إنجاز اليوم"}
-</Button>
-                </motion.div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                      {completed
+                        ? "تم تحقيق الهدف 🎉"
+                        : doneToday
+                          ? "تم تسجيل اليوم"
+                          : markDone.isPending
+                            ? "جاري التسجيل..."
+                            : "تسجيل إنجاز اليوم"}
+                    </Button>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </motion.div>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="rounded-[2rem] max-w-lg">
@@ -291,7 +409,7 @@ export default function Habits() {
 
             <Button
               onClick={handleCreate}
-              disabled={createHabit.isPending}
+              disabled={createHabit.isPending || !title.trim()}
               className="w-full h-12 rounded-2xl bg-blue-700 hover:bg-blue-800"
             >
               {createHabit.isPending ? "جاري الإضافة..." : "حفظ العادة"}

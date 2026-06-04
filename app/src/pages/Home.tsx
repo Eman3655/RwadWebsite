@@ -34,16 +34,20 @@ const levelColors: Record<string, string> = {
 };
 
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  show: { opacity: 1, y: 0 },
-};
-
-const revealSection: Variants = {
-  hidden: { opacity: 0, y: 40 },
+  hidden: { opacity: 0, y: 14 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.65, ease: "easeOut" },
+    transition: { duration: 0.35, ease: "easeOut" },
+  },
+};
+
+const revealSection: Variants = {
+  hidden: { opacity: 0, y: 18 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: "easeOut" },
   },
 };
 
@@ -51,35 +55,17 @@ const staggerContainer: Variants = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.12,
+      staggerChildren: 0.08,
     },
   },
 };
 
-const cardFromBottom: Variants = {
-  hidden: { opacity: 0, y: 35 },
+const cardSoftReveal: Variants = {
+  hidden: { opacity: 0, y: 18 },
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, ease: "easeOut" },
-  },
-};
-
-const cardFromRight: Variants = {
-  hidden: { opacity: 0, x: 35 },
-  show: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.55, ease: "easeOut" },
-  },
-};
-
-const cardFromLeft: Variants = {
-  hidden: { opacity: 0, x: -35 },
-  show: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.55, ease: "easeOut" },
+    transition: { duration: 0.35, ease: "easeOut" },
   },
 };
 
@@ -164,7 +150,7 @@ export default function Home() {
         <motion.div
           initial="hidden"
           animate="show"
-          transition={{ staggerChildren: 0.1 }}
+          variants={staggerContainer}
           className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
         >
           <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -214,91 +200,46 @@ export default function Home() {
             </div>
 
             <motion.div variants={fadeUp} className="relative hidden lg:block">
-              <div className="relative">
-                <div className="absolute -top-6 -right-6 w-72 h-72 bg-blue-300/30 blur-3xl rounded-full" />
-                <div className="absolute -bottom-10 -left-10 w-72 h-72 bg-purple-300/30 blur-3xl rounded-full" />
+              <div className="relative bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden">
+                <div className="h-14 bg-slate-50 border-b flex items-center px-5 gap-2">
+                  <div className="w-3 h-3 rounded-full bg-red-400" />
+                  <div className="w-3 h-3 rounded-full bg-yellow-400" />
+                  <div className="w-3 h-3 rounded-full bg-green-400" />
+                </div>
 
-                <div className="relative bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden">
-                  <div className="h-14 bg-slate-50 border-b flex items-center px-5 gap-2">
-                    <div className="w-3 h-3 rounded-full bg-red-400" />
-                    <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                    <div className="w-3 h-3 rounded-full bg-green-400" />
-                  </div>
-
-                  <div className="p-6 bg-gradient-to-br from-slate-50 to-blue-50">
-                    <div className="grid grid-cols-2 gap-4 mb-5">
-                      <div className="bg-white rounded-2xl p-5 shadow-sm border">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-slate-400 text-sm">
-                              الكورسات
-                            </div>
-                            <div className="text-3xl font-extrabold mt-2 text-slate-900">
-                              {stats?.courses ?? 0}
-                            </div>
-                          </div>
-
-                          <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center">
-                            <BookOpen className="h-6 w-6 text-blue-700" />
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="bg-white rounded-2xl p-5 shadow-sm border">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-slate-400 text-sm">
-                              الطلاب
-                            </div>
-                            <div className="text-3xl font-extrabold mt-2 text-slate-900">
-                              {stats?.students ?? 0}
-                            </div>
-                          </div>
-
-                          <div className="w-12 h-12 rounded-2xl bg-purple-100 flex items-center justify-center">
-                            <Users className="h-6 w-6 text-purple-700" />
-                          </div>
-                        </div>
+                <div className="p-6 bg-gradient-to-br from-slate-50 to-blue-50">
+                  <div className="grid grid-cols-2 gap-4 mb-5">
+                    <div className="bg-white rounded-2xl p-5 shadow-sm border">
+                      <div className="text-slate-400 text-sm">الكورسات</div>
+                      <div className="text-3xl font-extrabold mt-2 text-slate-900">
+                        {stats?.courses ?? 0}
                       </div>
                     </div>
 
-                    <div className="bg-white rounded-3xl border shadow-sm p-5">
-                      <div className="flex items-center justify-between mb-5">
-                        <div>
-                          <div className="font-bold text-slate-900">
-                            تقدم الطالب
-                          </div>
-                          <div className="text-sm text-slate-400 mt-1">
-                            متابعة الإنجاز التعليمي
-                          </div>
+                    <div className="bg-white rounded-2xl p-5 shadow-sm border">
+                      <div className="text-slate-400 text-sm">الطلاب</div>
+                      <div className="text-3xl font-extrabold mt-2 text-slate-900">
+                        {stats?.students ?? 0}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white rounded-3xl border shadow-sm p-5">
+                    <div className="flex items-center justify-between mb-5">
+                      <div>
+                        <div className="font-bold text-slate-900">
+                          تقدم الطالب
                         </div>
-
-                        <div className="text-blue-700 font-bold">78%</div>
+                        <div className="text-sm text-slate-400 mt-1">
+                          متابعة الإنجاز التعليمي
+                        </div>
                       </div>
 
-                      <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
-                        <div className="h-full w-[78%] bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full" />
-                      </div>
+                      <div className="text-blue-700 font-bold">78%</div>
+                    </div>
 
-                      <div className="grid grid-cols-3 gap-3 mt-6">
-                        {[
-                          { value: "12", label: "درس" },
-                          { value: "4", label: "اختبارات" },
-                          { value: "2", label: "شهادات" },
-                        ].map((item) => (
-                          <div
-                            key={item.label}
-                            className="rounded-2xl bg-slate-50 p-4 text-center"
-                          >
-                            <div className="text-xl font-bold text-slate-900">
-                              {item.value}
-                            </div>
-                            <div className="text-xs text-slate-400 mt-1">
-                              {item.label}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                    <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
+                      <div className="h-full w-[78%] bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full" />
                     </div>
                   </div>
                 </div>
@@ -312,7 +253,7 @@ export default function Home() {
         variants={revealSection}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.15 }}
         className="-mt-8 relative z-10 pb-14"
       >
         <div className="max-w-7xl mx-auto px-4">
@@ -320,17 +261,14 @@ export default function Home() {
             variants={staggerContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.15 }}
             className="grid grid-cols-2 lg:grid-cols-4 gap-4"
           >
-            {statsCards.map((stat, index) => {
+            {statsCards.map((stat) => {
               const Icon = stat.icon;
 
               return (
-                <motion.div
-                  key={stat.label}
-                  variants={index % 2 === 0 ? cardFromRight : cardFromLeft}
-                >
+                <motion.div key={stat.label} variants={cardSoftReveal}>
                   <Card className="border-0 shadow-md rounded-3xl">
                     <CardContent className="p-5 text-center">
                       <div
@@ -363,12 +301,12 @@ export default function Home() {
         variants={revealSection}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.18 }}
+        viewport={{ once: true, amount: 0.12 }}
         className="py-14"
       >
         <div className="max-w-7xl mx-auto px-4">
           <motion.div
-            variants={cardFromBottom}
+            variants={cardSoftReveal}
             className="flex items-end justify-between gap-4 mb-8"
           >
             <div>
@@ -392,20 +330,11 @@ export default function Home() {
             variants={staggerContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, amount: 0.15 }}
+            viewport={{ once: true, amount: 0.12 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {courses.map((course, index) => (
-              <motion.div
-                key={course.id}
-                variants={
-                  index % 3 === 0
-                    ? cardFromRight
-                    : index % 3 === 1
-                      ? cardFromBottom
-                      : cardFromLeft
-                }
-              >
+            {courses.map((course) => (
+              <motion.div key={course.id} variants={cardSoftReveal}>
                 <Link to={`/courses/${course.id}`}>
                   <Card className="overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-3xl h-full bg-white">
                     <div className="relative h-48 bg-gradient-to-br from-blue-500 to-indigo-600">
@@ -489,11 +418,11 @@ export default function Home() {
         variants={revealSection}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.12 }}
         className="py-16 bg-white"
       >
         <div className="max-w-7xl mx-auto px-4">
-          <motion.div variants={cardFromBottom} className="text-center mb-10">
+          <motion.div variants={cardSoftReveal} className="text-center mb-10">
             <h2 className="text-3xl font-extrabold text-slate-900">
               لماذا أكاديمية الرواد؟
             </h2>
@@ -506,22 +435,16 @@ export default function Home() {
             variants={staggerContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, amount: 0.18 }}
+            viewport={{ once: true, amount: 0.12 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
           >
-            {features.map((feature, index) => {
+            {features.map((feature) => {
               const Icon = feature.icon;
 
               return (
                 <motion.div
                   key={feature.title}
-                  variants={
-                    index % 3 === 0
-                      ? cardFromRight
-                      : index % 3 === 1
-                        ? cardFromBottom
-                        : cardFromLeft
-                  }
+                  variants={cardSoftReveal}
                   className="rounded-3xl bg-slate-50 border border-slate-100 p-6 hover:bg-blue-50 transition"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 text-blue-700">
@@ -546,11 +469,11 @@ export default function Home() {
         variants={revealSection}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.2 }}
+        viewport={{ once: true, amount: 0.12 }}
         className="py-16 bg-white"
       >
         <div className="max-w-7xl mx-auto px-4">
-          <motion.div variants={cardFromBottom} className="text-center mb-10">
+          <motion.div variants={cardSoftReveal} className="text-center mb-10">
             <h2 className="text-3xl font-extrabold text-slate-900">
               ابدأ بخطوات بسيطة
             </h2>
@@ -563,7 +486,7 @@ export default function Home() {
             variants={staggerContainer}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ once: true, amount: 0.12 }}
             className="grid grid-cols-1 md:grid-cols-3 gap-5"
           >
             {[
@@ -592,19 +515,13 @@ export default function Home() {
                 bg: "#EAF7EE",
                 text: "#166534",
               },
-            ].map((item, index) => {
+            ].map((item) => {
               const Icon = item.icon;
 
               return (
                 <motion.div
                   key={item.step}
-                  variants={
-                    index === 0
-                      ? cardFromRight
-                      : index === 1
-                        ? cardFromBottom
-                        : cardFromLeft
-                  }
+                  variants={cardSoftReveal}
                   className="rounded-[2rem] border border-slate-100 bg-slate-50 p-6 hover:bg-white hover:shadow-lg transition"
                 >
                   <div
@@ -634,10 +551,10 @@ export default function Home() {
           </motion.div>
 
           <motion.div
-            variants={cardFromBottom}
+            variants={cardSoftReveal}
             initial="hidden"
             whileInView="show"
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: true, amount: 0.2 }}
             className="flex justify-center gap-3 mt-10"
           >
             <Link to="/register">

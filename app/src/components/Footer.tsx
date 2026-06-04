@@ -12,7 +12,7 @@ export default function Footer() {
               <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
                 <GraduationCap className="h-5 w-5 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">منصة عِلم</span>
+              <span className="text-xl font-bold text-white">أكاديمية الرواد</span>
             </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-4">
               منصة تعليمية متكاملة تقدم تجربة تعلم فريدة مع أفضل المدربين ومحتوى تعليمي غني
@@ -73,7 +73,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-slate-800 mt-10 pt-6 text-center text-sm text-slate-500">
-          جميع الحقوق محفوظة © 2026 منصة عِلم
+          جميع الحقوق محفوظة © 2026 أكاديمية الرواد
         </div>
       </div>
     </footer>

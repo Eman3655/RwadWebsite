@@ -44,6 +44,7 @@ export default function CourseDetail() {
   });
 
   const isEnrolled = myCourses?.some((c) => c.id === courseId);
+  const currentCourse = myCourses?.find((c) => c.id === courseId);
 
   const { data: lessonProgressData } = trpc.lesson.getProgress.useQuery(
     { courseId },
@@ -64,13 +65,14 @@ export default function CourseDetail() {
       navigate("/login");
       return;
     }
+
     setEnrolling(true);
     enrollMutation.mutate({ courseId });
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
       </div>
     );
@@ -78,138 +80,175 @@ export default function CourseDetail() {
 
   if (!course) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-[#F8FAFC]">
         <Navbar />
-        <div className="pt-24 text-center">
-          <h2 className="text-2xl font-bold text-slate-900">الكورس غير موجود</h2>
+
+        <div className="pt-28 text-center px-4">
+          <h2 className="text-2xl font-bold text-slate-900">
+            الكورس غير موجود
+          </h2>
+
           <Link to="/courses">
-            <Button className="mt-4">العودة للكورسات</Button>
+            <Button className="mt-4 rounded-2xl bg-blue-700 hover:bg-blue-800">
+              العودة للكورسات
+            </Button>
           </Link>
         </div>
+
         <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
 
-      {/* Hero */}
-      <section className="pt-20 bg-gradient-to-br from-blue-600 to-indigo-700 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex items-center gap-2 text-blue-200 text-sm mb-4">
-            <Link to="/courses" className="hover:text-white transition-colors">
+      <section className="pt-24 pb-10 bg-gradient-to-br from-[#E5F0FF] via-white to-[#F3E8FF]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-2 text-slate-500 text-sm mb-5">
+            <Link to="/courses" className="hover:text-blue-700">
               الكورسات
             </Link>
             <ChevronLeft className="h-4 w-4" />
-            <span>{course.title}</span>
+            <span className="line-clamp-1">{course.title}</span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             <div className="lg:col-span-2">
-              <Badge className="bg-white/20 text-white border-white/30 mb-4">
+              <Badge className="bg-white text-blue-700 border border-blue-100 rounded-full mb-4">
                 {course.categoryName || "عام"}
               </Badge>
-              <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
-              <p className="text-blue-100 text-lg mb-6 leading-relaxed">
+
+              <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-4 leading-tight">
+                {course.title}
+              </h1>
+
+              <p className="text-slate-600 text-lg mb-7 leading-8 max-w-3xl">
                 {course.description || "لا يوجد وصف"}
               </p>
-              <div className="flex flex-wrap gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <GraduationCap className="h-5 w-5 text-amber-300" />
-                  <span>{course.instructorName}</span>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="bg-white/80 border border-white rounded-2xl p-4">
+                  <GraduationCap className="h-5 w-5 text-blue-700 mb-2" />
+                  <div className="text-xs text-slate-500">المدرب</div>
+                  <div className="text-sm font-bold text-slate-900 line-clamp-1">
+                    {course.instructorName || "غير معروف"}
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Clock className="h-5 w-5 text-amber-300" />
-                  <span>{course.duration} ساعة</span>
+
+                <div className="bg-white/80 border border-white rounded-2xl p-4">
+                  <Clock className="h-5 w-5 text-blue-700 mb-2" />
+                  <div className="text-xs text-slate-500">المدة</div>
+                  <div className="text-sm font-bold text-slate-900">
+                    {course.duration} ساعة
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-amber-300" />
-                  <span>{course.totalLessons} درس</span>
+
+                <div className="bg-white/80 border border-white rounded-2xl p-4">
+                  <BookOpen className="h-5 w-5 text-blue-700 mb-2" />
+                  <div className="text-xs text-slate-500">الدروس</div>
+                  <div className="text-sm font-bold text-slate-900">
+                    {course.totalLessons} درس
+                  </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <HelpCircle className="h-5 w-5 text-amber-300" />
-                  <span>{course.totalQuizzes} اختبار</span>
+
+                <div className="bg-white/80 border border-white rounded-2xl p-4">
+                  <HelpCircle className="h-5 w-5 text-blue-700 mb-2" />
+                  <div className="text-xs text-slate-500">الاختبارات</div>
+                  <div className="text-sm font-bold text-slate-900">
+                    {course.totalQuizzes} اختبار
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div>
-              <Card className="border-0 shadow-xl">
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
-                    {Number(course.price) === 0 ? "مجاني" : `${course.price} ريال`}
-                  </div>
-                  <div className="text-sm text-slate-500 mb-6">
-                    المستوى: {levelLabels[course.level]}
-                  </div>
-                  {isEnrolled ? (
-                    <div className="space-y-3">
-                      <Badge className="bg-green-100 text-green-700 px-4 py-2 text-sm">
-                        <CheckCircle className="h-4 w-4 ml-1" />
-                        مسجل في الكورس
-                      </Badge>
-                      {myCourses?.find((c) => c.id === courseId)?.progress !== undefined && (
-                        <div>
-                          <div className="flex justify-between text-sm mb-1">
-                            <span>التقدم</span>
-                            <span>{myCourses?.find((c) => c.id === courseId)?.progress}%</span>
-                          </div>
-                          <Progress
-                            value={myCourses?.find((c) => c.id === courseId)?.progress}
-                            className="h-2"
-                          />
+            <Card className="border-0 shadow-lg rounded-[2rem] bg-white">
+              <CardContent className="p-6 text-center">
+                <div className="text-sm text-slate-500 mb-1">سعر الكورس</div>
+
+                <div className="text-4xl font-extrabold text-blue-700 mb-2">
+                  {Number(course.price) === 0
+                    ? "مجاني"
+                    : `${course.price} ريال`}
+                </div>
+
+                <div className="text-sm text-slate-500 mb-6">
+                  المستوى: {levelLabels[course.level]}
+                </div>
+
+                {isEnrolled ? (
+                  <div className="space-y-4">
+                    <Badge className="bg-green-100 text-green-700 px-4 py-2 text-sm rounded-full">
+                      <CheckCircle className="h-4 w-4 ml-1" />
+                      مسجل في الكورس
+                    </Badge>
+
+                    {currentCourse?.progress !== undefined && (
+                      <div>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-slate-500">التقدم</span>
+                          <span className="font-bold text-blue-700">
+                            {currentCourse.progress}%
+                          </span>
                         </div>
-                      )}
-                    </div>
-                  ) : (
-                    <Button
-                      className="w-full bg-blue-600 hover:bg-blue-700 text-lg py-6"
-                      onClick={handleEnroll}
-                      disabled={enrolling}
-                    >
-                      {enrolling ? (
-                        <Loader2 className="h-5 w-5 animate-spin ml-2" />
-                      ) : (
-                        <Play className="h-5 w-5 ml-2" />
-                      )}
-                      {enrolling ? "جاري التسجيل..." : "سجل الآن"}
-                    </Button>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+
+                        <Progress value={currentCourse.progress} />
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <Button
+                    className="w-full h-12 rounded-2xl bg-blue-700 hover:bg-blue-800 text-base font-bold"
+                    onClick={handleEnroll}
+                    disabled={enrolling}
+                  >
+                    {enrolling ? (
+                      <Loader2 className="h-5 w-5 animate-spin ml-2" />
+                    ) : (
+                      <Play className="h-5 w-5 ml-2" />
+                    )}
+
+                    {enrolling ? "جاري التسجيل..." : "سجل الآن"}
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
 
-      {/* Content */}
       <section className="py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Lessons List */}
             <div className="lg:col-span-2">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                محتوى الكورس
-              </h2>
+              <Card className="border-0 shadow-sm rounded-[2rem]">
+                <CardContent className="p-6">
+                  <h2 className="text-2xl font-extrabold text-slate-900 mb-1">
+                    محتوى الكورس
+                  </h2>
 
-              {course.lessons.length === 0 ? (
-                <Card className="border-0 shadow-md">
-                  <CardContent className="p-8 text-center text-slate-500">
-                    <BookOpen className="h-12 w-12 mx-auto mb-3 text-slate-300" />
-                    لا توجد دروس متاحة حالياً
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {course.lessons.map((lesson, index) => {
-                    const progress = lessonProgressData?.find(
-                      (lp) => lp.lessonId === lesson.id,
-                    );
-                    const isCompleted = progress?.isCompleted ?? false;
-                    const isFirst = index === 0;
-                    const canAccess = isEnrolled && (lesson.isFree || isFirst || isCompleted);
+                  <p className="text-sm text-slate-500 mb-6">
+                    الدروس مرتبة لتبدأ خطوة بخطوة.
+                  </p>
+
+                  {course.lessons.length === 0 ? (
+                    <div className="p-10 text-center text-slate-500">
+                      <BookOpen className="h-12 w-12 mx-auto mb-3 text-slate-300" />
+                      لا توجد دروس متاحة حالياً
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {course.lessons.map((lesson, index) => {
+                        const progress = lessonProgressData?.find(
+                          (lp) => lp.lessonId === lesson.id,
+                        );
+
+                        const isCompleted = progress?.isCompleted ?? false;
+                        const isFirst = index === 0;
+                        const canAccess =
+                          isEnrolled &&
+                          (lesson.isFree || isFirst || isCompleted);
 
                     return (
                       <Card
@@ -271,60 +310,79 @@ export default function CourseDetail() {
                           </div>
                         </CardContent>
                       </Card>
-                    );
-                  })}
-                </div>
-              )}
+                      );
+                      })}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Sidebar - Quizzes */}
             <div>
-              <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                الاختبارات
-              </h2>
-              {course.quizzes.length === 0 ? (
-                <Card className="border-0 shadow-md">
-                  <CardContent className="p-6 text-center text-slate-500">
-                    <HelpCircle className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-                    لا توجد اختبارات
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="space-y-3">
-                  {course.quizzes.map((quiz) => (
-                    <Card key={quiz.id} className="border-0 shadow-sm">
-                      <CardContent className="p-4">
-                        <h3 className="font-semibold text-slate-900 mb-2">
-                          {quiz.title}
-                        </h3>
-                        <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
-                          <span className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {quiz.timeLimit} دقيقة
-                          </span>
-                          <span>درجة النجاح: {quiz.passingScore}%</span>
-                        </div>
-                        {isEnrolled ? (
-                          <Link to={`/quizzes/${quiz.id}`}>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
-                            >
-                              بدء الاختبار
-                            </Button>
-                          </Link>
-                        ) : (
-                          <Button size="sm" variant="outline" disabled className="w-full">
-                            <Lock className="h-4 w-4 ml-1" />
-                            سجل للوصول
-                          </Button>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
+              <Card className="border-0 shadow-sm rounded-[2rem]">
+                <CardContent className="p-6">
+                  <h2 className="text-2xl font-extrabold text-slate-900 mb-1">
+                    الاختبارات
+                  </h2>
+
+                  <p className="text-sm text-slate-500 mb-6">
+                    اختبر فهمك بعد دراسة الدروس.
+                  </p>
+
+                  {course.quizzes.length === 0 ? (
+                    <div className="p-8 rounded-3xl bg-slate-50 text-center text-slate-500">
+                      <HelpCircle className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+                      لا توجد اختبارات
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {course.quizzes.map((quiz) => (
+                        <Card
+                          key={quiz.id}
+                          className="border border-slate-100 shadow-sm rounded-3xl bg-slate-50"
+                        >
+                          <CardContent className="p-4">
+                            <h3 className="font-bold text-slate-900 mb-3 line-clamp-1">
+                              {quiz.title}
+                            </h3>
+
+                            <div className="flex items-center gap-4 text-sm text-slate-500 mb-4">
+                              <span className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                {quiz.timeLimit} دقيقة
+                              </span>
+
+                              <span>النجاح: {quiz.passingScore}%</span>
+                            </div>
+
+                            {isEnrolled ? (
+                              <Link to={`/quizzes/${quiz.id}`}>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="w-full rounded-2xl bg-white border-blue-600 text-blue-700 hover:bg-blue-50"
+                                >
+                                  بدء الاختبار
+                                </Button>
+                              </Link>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled
+                                className="w-full rounded-2xl bg-white"
+                              >
+                                <Lock className="h-4 w-4 ml-1" />
+                                سجل للوصول
+                              </Button>
+                            )}
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
