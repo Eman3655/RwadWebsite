@@ -81,12 +81,12 @@ export default function QuizPage() {
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [error, setError] = useState("");
 
-  const [result, setResult] = useState<{
-    score: number;
-    totalMarks: number;
-    percentage: number;
-    isPassed: boolean;
-  } | null>(null);
+const [result, setResult] = useState<{
+  score: number;
+  totalMarks: number;
+  percentage: number;
+  isPassed: boolean;
+} | null>(null);
 
   const submitMutation = trpc.quiz.submit.useMutation({
     onSuccess: (data) => {
@@ -109,11 +109,11 @@ export default function QuizPage() {
   useEffect(() => {
     if (previousAttempt && !quizSubmitted) {
       setResult({
-        score: previousAttempt.score,
-        totalMarks: previousAttempt.totalMarks,
-        percentage: Number(previousAttempt.percentage),
-        isPassed: previousAttempt.isPassed,
-      });
+  score: Number(previousAttempt.score ?? 0),
+  totalMarks: Number(previousAttempt.totalMarks ?? 0),
+  percentage: Number(previousAttempt.percentage ?? 0),
+  isPassed: Boolean(previousAttempt.isPassed),
+});
 
       setAnswers(normalizeAnswers(previousAttempt.answers));
       setQuizSubmitted(true);

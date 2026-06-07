@@ -18,7 +18,6 @@ function isToday(date?: Date | null) {
 }
 
 export const habitRouter = createRouter({
-
   list: authedQuery.query(async ({ ctx }) => {
     const db = getDb();
 
@@ -28,7 +27,6 @@ export const habitRouter = createRouter({
       .where(eq(habits.userId, ctx.user.id))
       .orderBy(desc(habits.createdAt));
   }),
-
 
   create: authedQuery
     .input(
@@ -41,20 +39,22 @@ export const habitRouter = createRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
 
-      const result = await db.insert(habits).values({
-        userId: ctx.user.id,
-        title: input.title,
-        description: input.description,
-        goalDays: input.goalDays,
-        source: "student",
-      });
+      const [created] = await db
+        .insert(habits)
+        .values({
+          userId: ctx.user.id,
+          title: input.title,
+          description: input.description,
+          goalDays: input.goalDays,
+          source: "student",
+        })
+        .returning({ id: habits.id });
 
       return {
         success: true,
-        id: Number(result[0].insertId),
+        id: created.id,
       };
     }),
-
 
   update: authedQuery
     .input(
@@ -75,16 +75,10 @@ export const habitRouter = createRouter({
           description: input.description,
           goalDays: input.goalDays,
         })
-        .where(
-          and(
-            eq(habits.id, input.id),
-            eq(habits.userId, ctx.user.id),
-          ),
-        );
+        .where(and(eq(habits.id, input.id), eq(habits.userId, ctx.user.id)));
 
       return { success: true };
     }),
-
 
   delete: authedQuery
     .input(
@@ -97,16 +91,10 @@ export const habitRouter = createRouter({
 
       await db
         .delete(habits)
-        .where(
-          and(
-            eq(habits.id, input.id),
-            eq(habits.userId, ctx.user.id),
-          ),
-        );
+        .where(and(eq(habits.id, input.id), eq(habits.userId, ctx.user.id)));
 
       return { success: true };
     }),
-
 
   markDone: authedQuery
     .input(
@@ -120,12 +108,7 @@ export const habitRouter = createRouter({
       const rows = await db
         .select()
         .from(habits)
-        .where(
-          and(
-            eq(habits.id, input.id),
-            eq(habits.userId, ctx.user.id),
-          ),
-        )
+        .where(and(eq(habits.id, input.id), eq(habits.userId, ctx.user.id)))
         .limit(1);
 
       const habit = rows[0];
@@ -174,7 +157,6 @@ export const habitRouter = createRouter({
       };
     }),
 
-
   adminCreate: adminQuery
     .input(
       z.object({
@@ -187,16 +169,20 @@ export const habitRouter = createRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
 
-      await db.insert(habits).values({
-        userId: input.userId,
-        title: input.title,
-        description: input.description,
-        goalDays: input.goalDays,
-        source: "admin",
-      });
+      const [created] = await db
+        .insert(habits)
+        .values({
+          userId: input.userId,
+          title: input.title,
+          description: input.description,
+          goalDays: input.goalDays,
+          source: "admin",
+        })
+        .returning({ id: habits.id });
 
       return {
         success: true,
+        id: created.id,
       };
     }),
 

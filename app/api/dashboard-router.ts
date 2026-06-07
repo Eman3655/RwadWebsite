@@ -142,12 +142,12 @@ export const dashboardRouter = createRouter({
 
     const results = await db
       .select({
-        month: sql<string>`DATE_FORMAT(${enrollments.enrolledAt}, '%Y-%m')`,
+        month: sql<string>`TO_CHAR(${enrollments.enrolledAt}, 'YYYY-MM')`,
         count: count(),
       })
       .from(enrollments)
-      .groupBy(sql`DATE_FORMAT(${enrollments.enrolledAt}, '%Y-%m')`)
-      .orderBy(sql`DATE_FORMAT(${enrollments.enrolledAt}, '%Y-%m')`)
+      .groupBy(sql`TO_CHAR(${enrollments.enrolledAt}, 'YYYY-MM')`)
+      .orderBy(sql`TO_CHAR(${enrollments.enrolledAt}, 'YYYY-MM')`)
       .limit(6);
 
     return results.map((r) => ({

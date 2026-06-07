@@ -1,8 +1,15 @@
 import { createRouter, publicQuery, authedQuery, adminQuery } from "./middleware";
 import { z } from "zod";
 import { getDb } from "./queries/connection";
-import { courses, lessons, quizzes, enrollments, categories, users } from "@db/schema";
-import { eq, desc, like, and, count } from "drizzle-orm";
+import {
+  courses,
+  lessons,
+  quizzes,
+  enrollments,
+  categories,
+  users,
+} from "@db/schema";
+import { eq, desc, like, and, count, type SQL } from "drizzle-orm";
 
 export const courseRouter = createRouter({
   list: publicQuery
@@ -23,20 +30,23 @@ export const courseRouter = createRouter({
       const limit = input?.limit ?? 12;
       const offset = (page - 1) * limit;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const conditions: any[] = [];
+const conditions: SQL[] = [];
       if (input?.search) {
         conditions.push(like(courses.title, `%${input.search}%`));
       }
+
       if (input?.categoryId) {
         conditions.push(eq(courses.categoryId, input.categoryId));
       }
+
       if (input?.level) {
         conditions.push(eq(courses.level, input.level));
       }
+
       conditions.push(eq(courses.isPublished, true));
 
-      const whereClause = conditions.length > 1 ? and(...conditions) : conditions[0];
+      const whereClause =
+        conditions.length > 1 ? and(...conditions) : conditions[0];
 
       const items = await db
         .select({
@@ -79,6 +89,7 @@ export const courseRouter = createRouter({
     .input(z.object({ id: z.number() }))
     .query(async ({ input }) => {
       const db = getDb();
+
       const courseRows = await db
         .select({
           id: courses.id,
@@ -107,14 +118,12 @@ export const courseRouter = createRouter({
 
       const course = courseRows[0];
 
-      // Get lessons
       const courseLessons = await db
         .select()
         .from(lessons)
         .where(eq(lessons.courseId, input.id))
         .orderBy(lessons.orderIndex);
 
-      // Get quizzes
       const courseQuizzes = await db
         .select()
         .from(quizzes)
@@ -139,12 +148,17 @@ export const courseRouter = createRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-      const result = await db.insert(courses).values({
-        ...input,
-        totalLessons: 0,
-        totalQuizzes: 0,
-      });
-      return { id: Number(result[0].insertId) };
+
+      const [created] = await db
+        .insert(courses)
+        .values({
+          ...input,
+          totalLessons: 0,
+          totalQuizzes: 0,
+        })
+        .returning({ id: courses.id });
+
+      return { id: created.id };
     }),
 
   update: adminQuery
@@ -165,7 +179,9 @@ export const courseRouter = createRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
       const { id, ...data } = input;
+
       await db.update(courses).set(data).where(eq(courses.id, id));
+
       return { success: true };
     }),
 
@@ -173,13 +189,15 @@ export const courseRouter = createRouter({
     .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = getDb();
+
       await db.delete(courses).where(eq(courses.id, input.id));
+
       return { success: true };
     }),
 
-  // Get all courses (admin)
   adminList: adminQuery.query(async () => {
     const db = getDb();
+
     return db
       .select({
         id: courses.id,
@@ -206,6 +224,7 @@ export const courseRouter = createRouter({
 
   categories: publicQuery.query(async () => {
     const db = getDb();
+
     return db.select().from(categories).orderBy(categories.name);
   }),
 
@@ -213,7 +232,7 @@ export const courseRouter = createRouter({
     .input(z.object({ courseId: z.number() }))
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
-      // Check if already enrolled
+
       const existing = await db
         .select()
         .from(enrollments)
@@ -229,18 +248,22 @@ export const courseRouter = createRouter({
         return { success: true, enrollmentId: existing[0].id };
       }
 
-      const result = await db.insert(enrollments).values({
-        studentId: ctx.user.id,
-        courseId: input.courseId,
-        status: "active",
-        progress: 0,
-      });
+      const [created] = await db
+        .insert(enrollments)
+        .values({
+          studentId: ctx.user.id,
+          courseId: input.courseId,
+          status: "active",
+          progress: 0,
+        })
+        .returning({ id: enrollments.id });
 
-      return { success: true, enrollmentId: Number(result[0].insertId) };
+      return { success: true, enrollmentId: created.id };
     }),
 
   myCourses: authedQuery.query(async ({ ctx }) => {
     const db = getDb();
+
     return db
       .select({
         id: courses.id,
@@ -264,16 +287,22 @@ export const courseRouter = createRouter({
 
   stats: publicQuery.query(async () => {
     const db = getDb();
+
     const [courseCount] = await db.select({ count: count() }).from(courses);
+
     const [studentCount] = await db
       .select({ count: count() })
       .from(users)
       .where(eq(users.role, "student"));
+
     const [teacherCount] = await db
       .select({ count: count() })
       .from(users)
       .where(eq(users.role, "teacher"));
-    const [enrollmentCount] = await db.select({ count: count() }).from(enrollments);
+
+    const [enrollmentCount] = await db
+      .select({ count: count() })
+      .from(enrollments);
 
     return {
       courses: courseCount?.count ?? 0,

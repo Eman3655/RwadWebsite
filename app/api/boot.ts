@@ -1,23 +1,20 @@
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
-import { serveStatic } from "@hono/node-server/serve-static";
 import type { HttpBindings } from "@hono/node-server";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
 import { appRouter } from "./router";
 import { createContext } from "./context";
 import { env } from "./lib/env";
 import { createOAuthCallbackHandler } from "./kimi/auth";
-import path from "path";
-import fs from "fs/promises";
 import { v2 as cloudinary } from "cloudinary";
 
 const app = new Hono<{ Bindings: HttpBindings }>();
 
 app.use(bodyLimit({ maxSize: 50 * 1024 * 1024 }));
 
-const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-const apiKey = process.env.CLOUDINARY_API_KEY;
-const apiSecret = process.env.CLOUDINARY_API_SECRET;
+const cloudName = env.cloudinaryCloudName;
+const apiKey = env.cloudinaryApiKey;
+const apiSecret = env.cloudinaryApiSecret;
 
 if (!cloudName || !apiKey || !apiSecret) {
   console.error("Missing Cloudinary environment variables:", {
@@ -33,6 +30,41 @@ cloudinary.config({
   api_secret: apiSecret,
 });
 
+async function uploadImageToCloudinary(file: File, folder: string) {
+  if (!(file instanceof File)) {
+    throw new Error("No file uploaded");
+  }
+
+  if (!file.type.startsWith("image/")) {
+    throw new Error("Only images are allowed");
+  }
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error(
+      "Cloudinary is not configured. Check CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET",
+    );
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const uploadResult = await new Promise<any>((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder,
+          resource_type: "image",
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        },
+      )
+      .end(buffer);
+  });
+
+  return uploadResult.secure_url as string;
+}
+
 app.post("/api/upload/course-image", async (c) => {
   try {
     const body = await c.req.parseBody();
@@ -42,53 +74,21 @@ app.post("/api/upload/course-image", async (c) => {
       return c.json({ message: "No file uploaded" }, 400);
     }
 
-    if (!file.type.startsWith("image/")) {
-      return c.json({ message: "Only images are allowed" }, 400);
-    }
+    const url = await uploadImageToCloudinary(file, "alrowad/courses");
 
-    if (!cloudName || !apiKey || !apiSecret) {
-      return c.json(
-        {
-          message:
-            "Cloudinary is not configured. Check CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET",
-        },
-        500,
-      );
-    }
-
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    const uploadResult = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: "alrowad/courses",
-            resource_type: "image",
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
-        )
-        .end(buffer);
-    });
-
-    return c.json({
-      url: uploadResult.secure_url,
-    });
+    return c.json({ url });
   } catch (error) {
     console.error("Course image upload failed:", error);
 
     return c.json(
       {
-        message: "Course image upload failed",
+        message:
+          error instanceof Error ? error.message : "Course image upload failed",
       },
       500,
     );
   }
 });
-
-app.use("/uploads/*", serveStatic({ root: "./" }));
 
 app.post("/api/upload/avatar", async (c) => {
   try {
@@ -99,36 +99,15 @@ app.post("/api/upload/avatar", async (c) => {
       return c.json({ message: "No file uploaded" }, 400);
     }
 
-    if (!file.type.startsWith("image/")) {
-      return c.json({ message: "Only images are allowed" }, 400);
-    }
+    const url = await uploadImageToCloudinary(file, "alrowad/avatars");
 
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    const uploadResult = await new Promise<any>((resolve, reject) => {
-      cloudinary.uploader
-        .upload_stream(
-          {
-            folder: "alrowad/avatars",
-            resource_type: "image",
-          },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
-        )
-        .end(buffer);
-    });
-
-    return c.json({
-      url: uploadResult.secure_url,
-    });
+    return c.json({ url });
   } catch (error) {
     console.error("Avatar upload failed:", error);
 
     return c.json(
       {
-        message: "Avatar upload failed",
+        message: error instanceof Error ? error.message : "Avatar upload failed",
       },
       500,
     );

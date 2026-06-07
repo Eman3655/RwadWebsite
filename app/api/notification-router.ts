@@ -2,7 +2,7 @@ import { createRouter, authedQuery, adminQuery } from "./middleware";
 import { z } from "zod";
 import { getDb } from "./queries/connection";
 import { notifications, users } from "@db/schema";
-import { eq, desc, asc } from "drizzle-orm";
+import { eq, desc, asc, and } from "drizzle-orm";
 
 export const notificationRouter = createRouter({
   students: adminQuery.query(async () => {
@@ -37,9 +37,14 @@ export const notificationRouter = createRouter({
     const rows = await db
       .select()
       .from(notifications)
-      .where(eq(notifications.userId, ctx.user.id));
+      .where(
+        and(
+          eq(notifications.userId, ctx.user.id),
+          eq(notifications.isRead, false),
+        ),
+      );
 
-    return rows.filter((n) => !n.isRead).length;
+    return rows.length;
   }),
 
   markAsRead: authedQuery
@@ -50,7 +55,12 @@ export const notificationRouter = createRouter({
       await db
         .update(notifications)
         .set({ isRead: true })
-        .where(eq(notifications.id, input.id));
+        .where(
+          and(
+            eq(notifications.id, input.id),
+            eq(notifications.userId, ctx.user.id),
+          ),
+        );
 
       return { success: true };
     }),
@@ -78,13 +88,16 @@ export const notificationRouter = createRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
 
-      const result = await db.insert(notifications).values({
-        userId: input.userId,
-        title: input.title,
-        message: input.message,
-        type: input.type,
-      });
+      const [created] = await db
+        .insert(notifications)
+        .values({
+          userId: input.userId,
+          title: input.title,
+          message: input.message,
+          type: input.type,
+        })
+        .returning({ id: notifications.id });
 
-      return { id: Number(result[0].insertId) };
+      return { id: created.id };
     }),
 });

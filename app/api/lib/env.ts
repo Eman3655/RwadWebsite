@@ -14,6 +14,9 @@ export const env = {
   databaseUrl: required("DATABASE_URL"),
   ownerUnionId: process.env.OWNER_UNION_ID || "",
   kimiAuthUrl: process.env.VITE_KIMI_AUTH_URL || "",
-  kimiOpenUrl: process.env.VITE_KIMI_AUTH_URL || "",
+  kimiOpenUrl: process.env.VITE_KIMI_OPEN_URL || "",
   isProduction: process.env.NODE_ENV === "production",
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || "",
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || "",
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || "",
 };

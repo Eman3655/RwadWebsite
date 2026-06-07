@@ -11,6 +11,7 @@ import {
   quizAttempts,
   certificates,
   notifications,
+  habits,
 } from "./schema";
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -19,6 +20,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   quizAttempts: many(quizAttempts),
   certificates: many(certificates),
   notifications: many(notifications),
+  habits: many(habits),
 }));
 
 export const categoriesRelations = relations(categories, ({ many }) => ({
@@ -112,6 +114,13 @@ export const certificatesRelations = relations(certificates, ({ one }) => ({
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
     fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const habitsRelations = relations(habits, ({ one }) => ({
+  user: one(users, {
+    fields: [habits.userId],
     references: [users.id],
   }),
 }));

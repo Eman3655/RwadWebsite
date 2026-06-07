@@ -83,7 +83,10 @@ export const lessonRouter = createRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
 
-      const result = await db.insert(lessons).values(input);
+      const [created] = await db
+        .insert(lessons)
+        .values(input)
+        .returning({ id: lessons.id });
 
       const lessonCount = await db
         .select()
@@ -95,7 +98,7 @@ export const lessonRouter = createRouter({
         .set({ totalLessons: lessonCount.length })
         .where(eq(courses.id, input.courseId));
 
-      return { id: Number(result[0].insertId) };
+      return { id: created.id };
     }),
 
   update: adminQuery
@@ -160,9 +163,7 @@ export const lessonRouter = createRouter({
         .where(eq(lessons.id, input.lessonId))
         .limit(1);
 
-      if (lesson.length === 0) {
-        throw new Error("Lesson not found");
-      }
+      if (lesson.length === 0) throw new Error("Lesson not found");
 
       const enrollment = await db
         .select()
@@ -227,9 +228,7 @@ export const lessonRouter = createRouter({
         .where(eq(lessons.id, input.lessonId))
         .limit(1);
 
-      if (lesson.length === 0) {
-        throw new Error("Lesson not found");
-      }
+      if (lesson.length === 0) throw new Error("Lesson not found");
 
       const enrollment = await db
         .select()
@@ -271,8 +270,6 @@ export const lessonRouter = createRouter({
           })
           .where(eq(lessonProgress.id, existingProgress[0].id));
       } else {
-        completed = true;
-
         await db.insert(lessonProgress).values({
           enrollmentId: enrollment[0].id,
           lessonId: input.lessonId,

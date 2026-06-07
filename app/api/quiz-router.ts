@@ -77,10 +77,13 @@ export const quizRouter = createRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
 
-      const result = await db.insert(quizzes).values({
-        ...input,
-        lessonId: input.lessonId ?? null,
-      });
+      const [created] = await db
+        .insert(quizzes)
+        .values({
+          ...input,
+          lessonId: input.lessonId ?? null,
+        })
+        .returning({ id: quizzes.id });
 
       const quizCount = await db
         .select()
@@ -92,7 +95,7 @@ export const quizRouter = createRouter({
         .set({ totalQuizzes: quizCount.length })
         .where(eq(courses.id, input.courseId));
 
-      return { id: Number(result[0].insertId) };
+      return { id: created.id };
     }),
 
   update: adminQuery
@@ -160,27 +163,28 @@ export const quizRouter = createRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
 
-      const result = await db.insert(questions).values({
-        quizId: input.quizId,
-        type: input.type,
-        question: input.question,
-        options: input.options ?? [],
-        correctAnswer: input.correctAnswer ?? 0,
-        marks: input.marks,
-        orderIndex: input.orderIndex,
-      });
+      const [created] = await db
+        .insert(questions)
+        .values({
+          quizId: input.quizId,
+          type: input.type,
+          question: input.question,
+          options: input.options ?? [],
+          correctAnswer: input.correctAnswer ?? 0,
+          marks: input.marks,
+          orderIndex: input.orderIndex,
+        })
+        .returning({ id: questions.id });
 
-      return { id: Number(result[0].insertId) };
+      return { id: created.id };
     }),
 
-      updateQuestion: adminQuery
+  updateQuestion: adminQuery
     .input(
       z.object({
         id: z.number(),
         question: z.string().min(1).optional(),
-        type: z
-          .enum(["multiple_choice", "true_false", "essay"])
-          .optional(),
+        type: z.enum(["multiple_choice", "true_false", "essay"]).optional(),
         options: z.array(z.string()).optional(),
         correctAnswer: z.number().optional(),
         marks: z.number().optional(),
@@ -189,7 +193,6 @@ export const quizRouter = createRouter({
     )
     .mutation(async ({ input }) => {
       const db = getDb();
-
       const { id, ...data } = input;
 
       await db
@@ -259,18 +262,21 @@ export const quizRouter = createRouter({
       const percentage = totalMarks > 0 ? (score / totalMarks) * 100 : 0;
       const isPassed = percentage >= (quiz.passingScore ?? 60);
 
-      const result = await db.insert(quizAttempts).values({
-        studentId: ctx.user.id,
-        quizId: input.quizId,
-        score,
-        totalMarks,
-        percentage: String(percentage.toFixed(2)),
-        isPassed,
-        answers: input.answers,
-      });
+      const [createdAttempt] = await db
+        .insert(quizAttempts)
+        .values({
+          studentId: ctx.user.id,
+          quizId: input.quizId,
+          score,
+          totalMarks,
+          percentage: String(percentage.toFixed(2)),
+          isPassed,
+          answers: input.answers,
+        })
+        .returning({ id: quizAttempts.id });
 
       return {
-        attemptId: Number(result[0].insertId),
+        attemptId: createdAttempt.id,
         score,
         totalMarks,
         percentage,

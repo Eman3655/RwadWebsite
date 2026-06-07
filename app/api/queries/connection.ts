@@ -1,19 +1,26 @@
-import { drizzle } from "drizzle-orm/mysql2";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 import { env } from "../lib/env";
 import * as schema from "@db/schema";
 import * as relations from "@db/relations";
 
 const fullSchema = { ...schema, ...relations };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let instance: any;
+let instance: ReturnType<typeof drizzle> | null = null;
 
 export function getDb() {
   if (!instance) {
-    instance = drizzle(env.databaseUrl, {
-      mode: "planetscale",
+    const pool = new Pool({
+      connectionString: env.databaseUrl,
+      ssl: env.databaseUrl.includes("localhost")
+        ? false
+        : { rejectUnauthorized: false },
+    });
+
+    instance = drizzle(pool, {
       schema: fullSchema,
     });
   }
+
   return instance;
 }

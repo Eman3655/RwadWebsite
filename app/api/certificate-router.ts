@@ -78,16 +78,19 @@ export const certificateRouter = createRouter({
       const db = getDb();
       const serialNumber = generateSerialNumber();
 
-      const result = await db.insert(certificates).values({
-        studentId: input.studentId,
-        courseId: input.courseId,
-        template: input.template,
-        fileUrl: input.fileUrl,
-        serialNumber,
-      });
+      const [created] = await db
+        .insert(certificates)
+        .values({
+          studentId: input.studentId,
+          courseId: input.courseId,
+          template: input.template,
+          fileUrl: input.fileUrl,
+          serialNumber,
+        })
+        .returning({ id: certificates.id });
 
       return {
-        id: Number(result[0].insertId),
+        id: created.id,
         serialNumber,
         fileUrl: input.fileUrl,
       };

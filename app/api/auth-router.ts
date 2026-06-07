@@ -81,21 +81,16 @@ export const authRouter = createRouter({
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
 
-      await db
+      const [updatedUser] = await db
         .update(users)
         .set({
           name: input.name.trim(),
           avatar: input.avatar?.trim() || null,
         })
-        .where(eq(users.id, ctx.user.id));
-
-      const rows = await db
-        .select()
-        .from(users)
         .where(eq(users.id, ctx.user.id))
-        .limit(1);
+        .returning();
 
-      return rows.at(0) ?? null;
+      return updatedUser ?? null;
     }),
 
   logout: authedQuery.mutation(async ({ ctx }) => {
@@ -201,17 +196,20 @@ export const authRouter = createRouter({
 
       const hashedPassword = await bcrypt.hash(input.password, 10);
 
-      const result = await db.insert(users).values({
-        name: input.name,
-        email: input.email,
-        password: hashedPassword,
-        role: input.role,
-        isActive: true,
-      });
+      const [createdUser] = await db
+        .insert(users)
+        .values({
+          name: input.name,
+          email: input.email,
+          password: hashedPassword,
+          role: input.role,
+          isActive: true,
+        })
+        .returning({ id: users.id });
 
       return {
         success: true,
-        userId: Number(result[0].insertId),
+        userId: createdUser.id,
       };
     }),
 });
