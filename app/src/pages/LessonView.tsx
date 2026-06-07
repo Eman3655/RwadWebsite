@@ -157,7 +157,7 @@ export default function LessonView() {
 
           <Link to="/courses">
             <Button className="mt-4 rounded-2xl bg-blue-700 hover:bg-blue-800">
-              العودة للكورسات
+              العودة للبرامج
             </Button>
           </Link>
         </div>
@@ -199,7 +199,7 @@ export default function LessonView() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
             <Link to="/courses" className="hover:text-blue-700">
-              الكورسات
+              البرامج
             </Link>
 
             <ChevronLeft className="h-4 w-4" />
@@ -208,7 +208,7 @@ export default function LessonView() {
               to={`/courses/${lesson.courseId}`}
               className="hover:text-blue-700"
             >
-              الكورس
+              البرنامج
             </Link>
 
             <ChevronLeft className="h-4 w-4" />
@@ -458,7 +458,7 @@ export default function LessonView() {
             ) : (
               <Link to={`/courses/${lesson.courseId}`}>
                 <Button className="rounded-2xl bg-green-600 hover:bg-green-700">
-                  العودة للكورس
+                  العودة للبرنامج
                   <ChevronLeft className="h-4 w-4 mr-1" />
                 </Button>
               </Link>

@@ -77,7 +77,7 @@ export default function Home() {
   const statsCards = [
     {
       icon: BookOpen,
-      label: "كورس تعليمي",
+      label: "البرامج التعليمية",
       value: stats?.courses ?? 0,
       bg: "#E5F0FF",
       text: "#1E40AF",
@@ -91,7 +91,7 @@ export default function Home() {
     },
     {
       icon: FileText,
-      label: "تسجيل في كورس",
+      label: "تسجيل في برنامج",
       value: stats?.enrollments ?? 0,
       bg: "#FFF4E5",
       text: "#C2410C",
@@ -114,7 +114,7 @@ export default function Home() {
     {
       icon: TrendingUp,
       title: "متابعة التقدم",
-      description: "لوحة خاصة للطالب تعرض مستوى الإنجاز والكورسات الحالية.",
+      description: "لوحة خاصة للطالب تعرض مستوى الإنجاز والبرامج الحالية.",
     },
     {
       icon: CheckCircle,
@@ -129,7 +129,7 @@ export default function Home() {
     {
       icon: Layers,
       title: "إدارة تعليمية مرنة",
-      description: "تنظيم الكورسات والدروس والاختبارات من لوحة تحكم واحدة.",
+      description: "تنظيم البرامج والدروس والاختبارات من لوحة تحكم واحدة.",
     },
     {
       icon: ShieldCheck,
@@ -169,7 +169,7 @@ export default function Home() {
                 variants={fadeUp}
                 className="mt-6 text-lg text-slate-600 leading-8 max-w-xl"
               >
-                منصة تعليمية تساعد الطالب على متابعة الكورسات والدروس
+                منصة تعليمية تساعد الطالب على متابعة البرامج والدروس
                 والاختبارات والشهادات في مكان واحد، بتجربة هادئة ومنظمة.
               </motion.p>
 
@@ -182,7 +182,7 @@ export default function Home() {
                     size="lg"
                     className="bg-blue-700 hover:bg-blue-800 rounded-2xl px-8 h-14 text-base shadow-lg"
                   >
-                    استكشف الكورسات
+                    استكشف البرامج
                     <ChevronLeft className="h-5 w-5 mr-2" />
                   </Button>
                 </Link>
@@ -210,7 +210,7 @@ export default function Home() {
                 <div className="p-6 bg-gradient-to-br from-slate-50 to-blue-50">
                   <div className="grid grid-cols-2 gap-4 mb-5">
                     <div className="bg-white rounded-2xl p-5 shadow-sm border">
-                      <div className="text-slate-400 text-sm">الكورسات</div>
+                      <div className="text-slate-400 text-sm">البرامج</div>
                       <div className="text-3xl font-extrabold mt-2 text-slate-900">
                         {stats?.courses ?? 0}
                       </div>
@@ -311,10 +311,10 @@ export default function Home() {
           >
             <div>
               <h2 className="text-3xl font-extrabold text-slate-900">
-                أحدث الكورسات
+                أحدث البرامج
               </h2>
               <p className="text-slate-500 mt-2">
-                اختر الكورس المناسب وابدأ رحلتك التعليمية.
+                اختر البرنامج المناسب وابدأ رحلتك التعليمية.
               </p>
             </div>
 
@@ -368,7 +368,7 @@ export default function Home() {
                       </h3>
 
                       <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-6">
-                        {course.description || "وصف الكورس غير متوفر حالياً."}
+                        {course.description || "وصف البرنامج غير متوفر حالياً."}
                       </p>
 
                       <div className="flex items-center justify-between mt-5 text-sm text-slate-500">
@@ -391,11 +391,10 @@ export default function Home() {
                           </span>
                         </div>
 
-                        <span className="font-bold text-blue-700">
-                          {Number(course.price) === 0
-                            ? "مجاني"
-                            : `${course.price} $`}
-                        </span>
+                              <div className="flex items-center gap-1 text-blue-700 font-bold text-sm">
+                                عرض التفاصيل
+                                <ChevronLeft className="h-4 w-4" />
+                              </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -407,7 +406,7 @@ export default function Home() {
           {courses.length === 0 && (
             <Card className="border-0 shadow-sm rounded-3xl">
               <CardContent className="p-12 text-center text-slate-400">
-                لا توجد كورسات متاحة حالياً
+                لا توجد برامج متاحة حالياً
               </CardContent>
             </Card>
           )}
@@ -500,8 +499,8 @@ export default function Home() {
               },
               {
                 step: "02",
-                title: "اختر الكورس",
-                description: "تصفح الكورسات المتاحة واختر ما يناسب هدفك.",
+                title: "اختر البرنامج",
+                description: "تصفح البرامج المتاحة واختر ما يناسب هدفك.",
                 icon: BookOpen,
                 bg: "#F3E8FF",
                 text: "#7C3AED",
@@ -565,7 +564,7 @@ export default function Home() {
 
             <Link to="/courses">
               <Button variant="outline" className="rounded-2xl px-8 bg-white">
-                تصفح الكورسات
+                تصفح البرامج
               </Button>
             </Link>
           </motion.div>

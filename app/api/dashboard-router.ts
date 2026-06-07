@@ -1,8 +1,19 @@
 import { createRouter, adminQuery } from "./middleware";
 import { z } from "zod";
 import { getDb } from "./queries/connection";
-import { users, courses, enrollments, lessons, quizAttempts, lessonProgress,quizzes , certificates } from "@db/schema";
-import { eq, desc, count, sql , and} from "drizzle-orm";
+import {
+  users,
+  courses,
+  enrollments,
+  lessons,
+  quizAttempts,
+  lessonProgress,
+  quizzes,
+  certificates,
+  habits,
+} from "@db/schema";
+import { eq, desc, count, sql, and } from "drizzle-orm";
+
 export const dashboardRouter = createRouter({
   stats: adminQuery.query(async () => {
     const db = getDb();
@@ -34,6 +45,7 @@ export const dashboardRouter = createRouter({
 
   students: adminQuery.query(async () => {
     const db = getDb();
+
     return db
       .select({
         id: users.id,
@@ -52,6 +64,7 @@ export const dashboardRouter = createRouter({
 
   teachers: adminQuery.query(async () => {
     const db = getDb();
+
     return db
       .select({
         id: users.id,
@@ -70,6 +83,7 @@ export const dashboardRouter = createRouter({
 
   allUsers: adminQuery.query(async () => {
     const db = getDb();
+
     return db
       .select({
         id: users.id,
@@ -87,6 +101,7 @@ export const dashboardRouter = createRouter({
 
   recentEnrollments: adminQuery.query(async () => {
     const db = getDb();
+
     return db
       .select({
         id: enrollments.id,
@@ -105,6 +120,7 @@ export const dashboardRouter = createRouter({
 
   courseStats: adminQuery.query(async () => {
     const db = getDb();
+
     return db
       .select({
         id: courses.id,
@@ -123,7 +139,7 @@ export const dashboardRouter = createRouter({
 
   monthlyEnrollments: adminQuery.query(async () => {
     const db = getDb();
-    // Get enrollments grouped by month for the last 6 months
+
     const results = await db
       .select({
         month: sql<string>`DATE_FORMAT(${enrollments.enrolledAt}, '%Y-%m')`,
@@ -141,12 +157,16 @@ export const dashboardRouter = createRouter({
   }),
 
   toggleUserStatus: adminQuery
-    .input(
-      z.object({ id: z.number() }),
-    )
+    .input(z.object({ id: z.number() }))
     .mutation(async ({ input }) => {
       const db = getDb();
-      const user = await db.select().from(users).where(eq(users.id, input.id)).limit(1);
+
+      const user = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, input.id))
+        .limit(1);
+
       if (user.length === 0) throw new Error("User not found");
 
       await db
@@ -157,67 +177,100 @@ export const dashboardRouter = createRouter({
       return { success: true };
     }),
 
-    studentProgressDetails: adminQuery
-  .input(z.object({ studentId: z.number() }))
-  .query(async ({ input }) => {
-    const db = getDb();
+  studentProgressDetails: adminQuery
+    .input(z.object({ studentId: z.number() }))
+    .query(async ({ input }) => {
+      const db = getDb();
 
-    const studentEnrollments = await db
-      .select({
-        enrollmentId: enrollments.id,
-        courseId: courses.id,
-        courseTitle: courses.title,
-        progress: enrollments.progress,
-        status: enrollments.status,
-        enrolledAt: enrollments.enrolledAt,
-      })
-      .from(enrollments)
-      .innerJoin(courses, eq(enrollments.courseId, courses.id))
-      .where(eq(enrollments.studentId, input.studentId));
+      const studentEnrollments = await db
+        .select({
+          enrollmentId: enrollments.id,
+          courseId: courses.id,
+          courseTitle: courses.title,
+          progress: enrollments.progress,
+          status: enrollments.status,
+          enrolledAt: enrollments.enrolledAt,
+        })
+        .from(enrollments)
+        .innerJoin(courses, eq(enrollments.courseId, courses.id))
+        .where(eq(enrollments.studentId, input.studentId));
 
-    const lessonRows = await db
-      .select({
-        courseId: courses.id,
-        courseTitle: courses.title,
-        lessonId: lessons.id,
-        lessonTitle: lessons.title,
-        isCompleted: sql<boolean>`COALESCE(${lessonProgress.isCompleted}, false)`,
-        completedAt: lessonProgress.completedAt,
-      })
-      .from(lessons)
-      .innerJoin(courses, eq(lessons.courseId, courses.id))
-      .innerJoin(enrollments, eq(enrollments.courseId, courses.id))
-      .leftJoin(
-        lessonProgress,
-        and(
-          eq(lessonProgress.lessonId, lessons.id),
-          eq(lessonProgress.enrollmentId, enrollments.id),
-        ),
-      )
-      .where(eq(enrollments.studentId, input.studentId));
+      const lessonRows = await db
+        .select({
+          courseId: courses.id,
+          courseTitle: courses.title,
+          lessonId: lessons.id,
+          lessonTitle: lessons.title,
+          isCompleted: sql<boolean>`COALESCE(${lessonProgress.isCompleted}, false)`,
+          completedAt: lessonProgress.completedAt,
+        })
+        .from(lessons)
+        .innerJoin(courses, eq(lessons.courseId, courses.id))
+        .innerJoin(enrollments, eq(enrollments.courseId, courses.id))
+        .leftJoin(
+          lessonProgress,
+          and(
+            eq(lessonProgress.lessonId, lessons.id),
+            eq(lessonProgress.enrollmentId, enrollments.id),
+          ),
+        )
+        .where(eq(enrollments.studentId, input.studentId));
 
-    const quizRows = await db
-      .select({
-        courseId: courses.id,
-        courseTitle: courses.title,
-        quizId: quizAttempts.quizId,
-        score: quizAttempts.score,
-        totalMarks: quizAttempts.totalMarks,
-        percentage: quizAttempts.percentage,
-        isPassed: quizAttempts.isPassed,
-        answers: quizAttempts.answers,
-        createdAt: quizAttempts.createdAt,
-      })
-      .from(quizAttempts)
-      .innerJoin(quizzes, eq(quizAttempts.quizId, quizzes.id))
-      .innerJoin(courses, eq(quizzes.courseId, courses.id))
-      .where(eq(quizAttempts.studentId, input.studentId))
-      .orderBy(desc(quizAttempts.createdAt));
+      const quizRows = await db
+        .select({
+          courseId: courses.id,
+          courseTitle: courses.title,
+          quizId: quizAttempts.quizId,
+          quizTitle: quizzes.title,
+          score: quizAttempts.score,
+          totalMarks: quizAttempts.totalMarks,
+          percentage: quizAttempts.percentage,
+          isPassed: quizAttempts.isPassed,
+          answers: quizAttempts.answers,
+          createdAt: quizAttempts.createdAt,
+        })
+        .from(quizAttempts)
+        .innerJoin(quizzes, eq(quizAttempts.quizId, quizzes.id))
+        .innerJoin(courses, eq(quizzes.courseId, courses.id))
+        .where(eq(quizAttempts.studentId, input.studentId))
+        .orderBy(desc(quizAttempts.createdAt));
 
-    return {
-      enrollments: studentEnrollments,
-      lessons: lessonRows,
-      quizzes: quizRows,
-    };
-  }),
+      const habitRows = await db
+        .select({
+          id: habits.id,
+          title: habits.title,
+          description: habits.description,
+          goalDays: habits.goalDays,
+          currentStreak: habits.currentStreak,
+          lastCompletedAt: habits.lastCompletedAt,
+          source: habits.source,
+          createdAt: habits.createdAt,
+        })
+        .from(habits)
+        .where(eq(habits.userId, input.studentId))
+        .orderBy(desc(habits.createdAt));
+
+      const habitsWithProgress = habitRows.map((habit) => {
+        const progress =
+          habit.goalDays > 0
+            ? Math.min(
+                Math.round((habit.currentStreak / habit.goalDays) * 100),
+                100,
+              )
+            : 0;
+
+        return {
+          ...habit,
+          progress,
+          isGoalCompleted: habit.currentStreak >= habit.goalDays,
+        };
+      });
+
+      return {
+        enrollments: studentEnrollments,
+        lessons: lessonRows,
+        quizzes: quizRows,
+        habits: habitsWithProgress,
+      };
+    }),
 });

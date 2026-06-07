@@ -85,12 +85,12 @@ export default function CourseDetail() {
 
         <div className="pt-28 text-center px-4">
           <h2 className="text-2xl font-bold text-slate-900">
-            الكورس غير موجود
+            البرنامج غير موجود
           </h2>
 
           <Link to="/courses">
             <Button className="mt-4 rounded-2xl bg-blue-700 hover:bg-blue-800">
-              العودة للكورسات
+              العودة للبرامج
             </Button>
           </Link>
         </div>
@@ -108,7 +108,7 @@ export default function CourseDetail() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-2 text-slate-500 text-sm mb-5">
             <Link to="/courses" className="hover:text-blue-700">
-              الكورسات
+              البرامج
             </Link>
             <ChevronLeft className="h-4 w-4" />
             <span className="line-clamp-1">{course.title}</span>
@@ -131,7 +131,7 @@ export default function CourseDetail() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="bg-white/80 border border-white rounded-2xl p-4">
                   <GraduationCap className="h-5 w-5 text-blue-700 mb-2" />
-                  <div className="text-xs text-slate-500">المدرب</div>
+                  <div className="text-xs text-slate-500">المعلم</div>
                   <div className="text-sm font-bold text-slate-900 line-clamp-1">
                     {course.instructorName || "غير معروف"}
                   </div>
@@ -165,14 +165,11 @@ export default function CourseDetail() {
 
             <Card className="border-0 shadow-lg rounded-[2rem] bg-white">
               <CardContent className="p-6 text-center">
-                <div className="text-sm text-slate-500 mb-1">سعر الكورس</div>
 
                 <div className="text-4xl font-extrabold text-blue-700 mb-2">
-                  {Number(course.price) === 0
-                    ? "مجاني"
-                    : `${course.price} ريال`}
+                  حيهلاً 😊
                 </div>
-
+                <br></br>
                 <div className="text-sm text-slate-500 mb-6">
                   المستوى: {levelLabels[course.level]}
                 </div>
@@ -181,7 +178,7 @@ export default function CourseDetail() {
                   <div className="space-y-4">
                     <Badge className="bg-green-100 text-green-700 px-4 py-2 text-sm rounded-full">
                       <CheckCircle className="h-4 w-4 ml-1" />
-                      مسجل في الكورس
+                      مسجل في البرنامج
                     </Badge>
 
                     {currentCourse?.progress !== undefined && (
@@ -225,7 +222,7 @@ export default function CourseDetail() {
               <Card className="border-0 shadow-sm rounded-[2rem]">
                 <CardContent className="p-6">
                   <h2 className="text-2xl font-extrabold text-slate-900 mb-1">
-                    محتوى الكورس
+                    محتوى البرنامج
                   </h2>
 
                   <p className="text-sm text-slate-500 mb-6">

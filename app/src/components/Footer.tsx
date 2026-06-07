@@ -30,7 +30,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link to="/courses" className="text-sm hover:text-blue-400 transition-colors">
-                  الكورسات
+                  البرامج
                 </Link>
               </li>
               <li>

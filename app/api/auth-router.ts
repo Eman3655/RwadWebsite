@@ -12,8 +12,12 @@ import bcrypt from "bcryptjs";
 
 const JWT_ALG = "HS256";
 
-async function signLocalToken(payload: { userId: number; email: string }): Promise<string> {
+async function signLocalToken(payload: {
+  userId: number;
+  email: string;
+}): Promise<string> {
   const secret = new TextEncoder().encode(env.appSecret);
+
   return new jose.SignJWT(payload as unknown as jose.JWTPayload)
     .setProtectedHeader({ alg: JWT_ALG })
     .setIssuedAt()
@@ -24,11 +28,16 @@ async function signLocalToken(payload: { userId: number; email: string }): Promi
 export async function verifyLocalToken(token: string) {
   try {
     const secret = new TextEncoder().encode(env.appSecret);
+
     const { payload } = await jose.jwtVerify(token, secret, {
       algorithms: [JWT_ALG],
       clockTolerance: 60,
     });
-    return payload as unknown as { userId: number; email: string };
+
+    return payload as unknown as {
+      userId: number;
+      email: string;
+    };
   } catch {
     return null;
   }
@@ -39,23 +48,60 @@ export const authRouter = createRouter({
     if (ctx.user) {
       return ctx.user;
     }
-    // Check local auth token
+
     const cookies = cookie.parse(ctx.req.headers.get("cookie") || "");
     const localToken = cookies["local_auth_token"];
+
     if (localToken) {
       const claim = await verifyLocalToken(localToken);
+
       if (claim) {
         const db = getDb();
-        const rows = await db.select().from(users).where(eq(users.id, claim.userId)).limit(1);
+
+        const rows = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, claim.userId))
+          .limit(1);
+
         return rows.at(0) ?? null;
       }
     }
+
     return null;
   }),
+
+  updateProfile: authedQuery
+    .input(
+      z.object({
+        name: z.string().min(2, "الاسم قصير جدًا"),
+        avatar: z.string().nullable().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+
+      await db
+        .update(users)
+        .set({
+          name: input.name.trim(),
+          avatar: input.avatar?.trim() || null,
+        })
+        .where(eq(users.id, ctx.user.id));
+
+      const rows = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, ctx.user.id))
+        .limit(1);
+
+      return rows.at(0) ?? null;
+    }),
 
   logout: authedQuery.mutation(async ({ ctx }) => {
     const opts = getSessionCookieOptions(ctx.req.headers);
     const cookies: string[] = [];
+
     cookies.push(
       cookie.serialize(Session.cookieName, "", {
         httpOnly: opts.httpOnly,
@@ -65,6 +111,7 @@ export const authRouter = createRouter({
         maxAge: 0,
       }),
     );
+
     cookies.push(
       cookie.serialize("local_auth_token", "", {
         httpOnly: true,
@@ -73,11 +120,12 @@ export const authRouter = createRouter({
         maxAge: 0,
       }),
     );
+
     cookies.forEach((c) => ctx.resHeaders.append("set-cookie", c));
+
     return { success: true };
   }),
 
-  // Local authentication (username/password)
   localLogin: publicQuery
     .input(
       z.object({
@@ -87,31 +135,35 @@ export const authRouter = createRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
+
       const rows = await db
         .select()
         .from(users)
         .where(eq(users.email, input.email))
         .limit(1);
+
       const user = rows.at(0);
 
       if (!user || !user.password) {
         throw new Error("Invalid email or password");
       }
 
-      // Compare password using bcryptjs
       const isValid = await bcrypt.compare(input.password, user.password);
+
       if (!isValid) {
         throw new Error("Invalid email or password");
       }
 
-      // Update last sign in
       await db
         .update(users)
         .set({ lastSignInAt: new Date() })
         .where(eq(users.id, user.id));
 
-      // Generate token
-      const token = await signLocalToken({ userId: user.id, email: user.email });
+      const token = await signLocalToken({
+        userId: user.id,
+        email: user.email,
+      });
+
       ctx.resHeaders.append(
         "set-cookie",
         cookie.serialize("local_auth_token", token, {
@@ -137,7 +189,6 @@ export const authRouter = createRouter({
     .mutation(async ({ input }) => {
       const db = getDb();
 
-      // Check if email exists
       const existing = await db
         .select()
         .from(users)
@@ -158,6 +209,9 @@ export const authRouter = createRouter({
         isActive: true,
       });
 
-      return { success: true, userId: Number(result[0].insertId) };
+      return {
+        success: true,
+        userId: Number(result[0].insertId),
+      };
     }),
 });

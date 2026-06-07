@@ -187,7 +187,7 @@ export default function QuizPage() {
           <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-3" />
           <h2 className="text-2xl font-bold">الاختبار غير موجود</h2>
           <Link to="/courses">
-            <Button className="mt-4">العودة للكورسات</Button>
+            <Button className="mt-4">العودة للبرامج</Button>
           </Link>
         </div>
       </div>
@@ -202,7 +202,7 @@ export default function QuizPage() {
           <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-3" />
           <h2 className="text-2xl font-bold">لا توجد أسئلة في هذا الاختبار</h2>
           <Link to={`/courses/${quiz.courseId}`}>
-            <Button className="mt-4">العودة للكورس</Button>
+            <Button className="mt-4">العودة للبرنامج</Button>
           </Link>
         </div>
       </div>
@@ -271,14 +271,14 @@ export default function QuizPage() {
                       : "bg-red-100 text-red-700"
                   }`}
                 >
-                  {result.isPassed ? "ناجح" : "راسب"}
+                  {result.isPassed ? "ناجح" : "حاول مجدداً"}
                 </Badge>
 
                 <div className="mt-8">
                   <Link to={`/courses/${quiz.courseId}`}>
                     <Button variant="outline">
                       <ArrowLeft className="h-4 w-4 ml-2" />
-                      العودة للكورس
+                      العودة للبرنامج
                     </Button>
                   </Link>
                 </div>
@@ -348,7 +348,7 @@ export default function QuizPage() {
           <div className="mb-6">
             <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
               <Link to={`/courses/${quiz.courseId}`} className="hover:text-blue-600">
-                الكورس
+                البرنامج
               </Link>
               <ChevronLeft className="h-4 w-4" />
               <span>{quiz.title}</span>

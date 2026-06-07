@@ -95,22 +95,22 @@ export default function Courses() {
                 <div>
                   <div className="inline-flex items-center gap-2 bg-white/70 border border-white px-3 py-1 rounded-full text-sm text-blue-700 mb-4">
                     <Sparkles className="h-4 w-4" />
-                    كورسات أكاديمية الرواد
+                    برامج أكاديمية الرواد
                   </div>
 
                   <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900">
-                    الكورسات التعليمية
+                    البرامج التعليمية
                   </h1>
 
                   <p className="text-slate-600 mt-3 max-w-xl leading-7">
-                    اختر الكورس المناسب، وابدأ رحلة تعليمية واضحة ومنظمة حسب
+                    اختر البرنامج المناسب، وابدأ رحلة تعليمية واضحة ومنظمة حسب
                     مستواك وهدفك.
                   </p>
                 </div>
 
                 <div className="bg-white/75 backdrop-blur rounded-3xl border border-white p-5 min-w-[210px]">
                   <div className="text-sm text-slate-500 mb-1">
-                    الكورسات المتاحة
+                    البرامج المتاحة
                   </div>
                   <div className="text-4xl font-extrabold text-blue-700">
                     {data?.total ?? courses.length}
@@ -132,7 +132,7 @@ export default function Courses() {
                   <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
 
                   <Input
-                    placeholder="ابحث عن كورس..."
+                    placeholder="ابحث عن برنامج..."
                     value={search}
                     onChange={(e) => {
                       setSearch(e.target.value);
@@ -198,7 +198,7 @@ export default function Courses() {
                 <BookOpen className="h-16 w-16 text-slate-300 mx-auto mb-4" />
 
                 <h3 className="text-2xl font-bold text-slate-700 mb-2">
-                  لا توجد كورسات
+                  لا توجد برامج
                 </h3>
 
                 <p className="text-slate-400">
@@ -252,11 +252,6 @@ export default function Courses() {
                                 <span>{course.categoryName || "قسم عام"}</span>
                               </div>
 
-                              <div className="rounded-full bg-white/90 px-3 py-1 text-sm font-bold text-blue-700">
-                                {Number(course.price) === 0
-                                  ? "مجاني"
-                                  : `${course.price} $`}
-                              </div>
                             </div>
                           </div>
 
@@ -266,14 +261,14 @@ export default function Courses() {
                             </h3>
 
                             <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-6 min-h-[48px]">
-                              {course.description || "لا يوجد وصف لهذا الكورس."}
+                              {course.description || "لا يوجد وصف لهذا البرنامج."}
                             </p>
 
                             <div className="grid grid-cols-2 gap-3 mt-5">
                               <div className="rounded-2xl bg-slate-50 p-3">
                                 <div className="flex items-center gap-2 text-slate-500 text-xs mb-1">
                                   <Users className="h-4 w-4" />
-                                  المدرّب
+                                  المعلم
                                 </div>
 
                                 <div className="text-sm font-bold text-slate-800 line-clamp-1">

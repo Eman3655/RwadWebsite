@@ -45,10 +45,12 @@ export default function AdminCourses() {
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
     description: "",
+    image: "",
     categoryId: 0,
     instructorId: 1,
     price: "0",
@@ -61,6 +63,7 @@ export default function AdminCourses() {
     setForm({
       title: "",
       description: "",
+      image: "",
       categoryId: 0,
       instructorId: 1,
       price: "0",
@@ -117,6 +120,7 @@ export default function AdminCourses() {
       duration: course.duration || 0,
       level: course.level || "beginner",
       isPublished: course.isPublished || false,
+      image: course.image || "",
     });
     setOpen(true);
   };
@@ -140,7 +144,7 @@ export default function AdminCourses() {
               <Link to="/dashboard" className="text-slate-500 hover:text-slate-700">
                 <ChevronLeft className="h-5 w-5" />
               </Link>
-              <h1 className="text-xl font-bold text-slate-900">إدارة الكورسات</h1>
+              <h1 className="text-xl font-bold text-slate-900">إدارة البرامج</h1>
             </div>
 
             <Dialog open={open} onOpenChange={setOpen}>
@@ -153,20 +157,20 @@ export default function AdminCourses() {
                   }}
                 >
                   <Plus className="h-4 w-4 ml-2" />
-                  كورس جديد
+                  برنامج جديد
                 </Button>
               </DialogTrigger>
 
               <DialogContent className="max-w-lg">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingId ? "تعديل الكورس" : "إضافة كورس جديد"}
+                    {editingId ? "تعديل البرنامج" : "إضافة برنامج جديد"}
                   </DialogTitle>
                 </DialogHeader>
 
                 <form onSubmit={handleSubmit} className="space-y-4 mt-4">
                   <div className="space-y-2">
-                    <Label>عنوان الكورس *</Label>
+                    <Label>عنوان البرنامج*</Label>
                     <Input
                       value={form.title}
                       onChange={(e) => setForm({ ...form, title: e.target.value })}
@@ -183,6 +187,60 @@ export default function AdminCourses() {
                       }
                     />
                   </div>
+
+                  <div className="space-y-2">
+  <Label>صورة البرنامج</Label>
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const formData = new FormData();
+      formData.append("image", file);
+
+      setUploadingImage(true);
+
+      try {
+        const res = await fetch("/api/upload/course-image", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Upload failed");
+        }
+
+        setForm((prev) => ({
+          ...prev,
+          image: data.url,
+        }));
+      } catch (error) {
+        console.error(error);
+        alert("فشل رفع صورة البرنامج");
+      } finally {
+        setUploadingImage(false);
+      }
+    }}
+    className="block w-full text-sm text-slate-600 file:ml-4 file:rounded-2xl file:border-0 file:bg-blue-600 file:px-4 file:py-2 file:text-white hover:file:bg-blue-700"
+  />
+
+  {uploadingImage && (
+    <p className="text-sm text-blue-600">جاري رفع الصورة...</p>
+  )}
+
+  {form.image && !uploadingImage && (
+    <img
+      src={form.image}
+      alt="course preview"
+      className="w-full h-36 rounded-2xl object-cover border"
+    />
+  )}
+</div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -280,7 +338,7 @@ export default function AdminCourses() {
                     ) : (
                       <Plus className="h-4 w-4 ml-2" />
                     )}
-                    {editingId ? "حفظ التعديلات" : "إضافة الكورس"}
+                    {editingId ? "حفظ التعديلات" : "إضافة البرنامج"}
                   </Button>
                 </form>
               </DialogContent>
@@ -294,7 +352,7 @@ export default function AdminCourses() {
           <div className="relative max-w-md">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <Input
-              placeholder="بحث في الكورسات..."
+              placeholder="بحث في البرامج..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pr-10"
@@ -309,7 +367,7 @@ export default function AdminCourses() {
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50">
                     <th className="text-right py-3 px-4 text-sm font-medium text-slate-500">
-                      الكورس
+                      البرنامج
                     </th>
                     <th className="text-right py-3 px-4 text-sm font-medium text-slate-500">
                       المستوى
@@ -402,7 +460,7 @@ export default function AdminCourses() {
                             size="sm"
                             className="text-red-500 hover:text-red-600 hover:bg-red-50"
                             onClick={() => {
-                              if (confirm("هل أنت متأكد من حذف هذا الكورس؟")) {
+                              if (confirm("هل أنت متأكد من حذف هذا البرنامج؟")) {
                                 deleteMutation.mutate({ id: course.id });
                               }
                             }}
@@ -417,7 +475,7 @@ export default function AdminCourses() {
                   {(!filteredCourses || filteredCourses.length === 0) && (
                     <tr>
                       <td colSpan={6} className="py-8 text-center text-slate-400">
-                        لا توجد كورسات
+                        لا توجد برامج
                       </td>
                     </tr>
                   )}

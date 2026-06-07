@@ -51,7 +51,7 @@ export default function AdminCertificates() {
                   <thead>
                     <tr className="border-b">
                       <th className="text-right py-3 px-4">الطالب</th>
-                      <th className="text-right py-3 px-4">الكورس</th>
+                      <th className="text-right py-3 px-4">البرنامج</th>
                       <th className="text-right py-3 px-4">الرقم التسلسلي</th>
                       <th className="text-right py-3 px-4">تاريخ الإصدار</th>
                       <th className="text-right py-3 px-4">الحالة</th>

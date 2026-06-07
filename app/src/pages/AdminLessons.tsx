@@ -295,13 +295,13 @@ export default function AdminLessons() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="border-0 shadow-md mb-6">
           <CardContent className="p-4">
-            <Label className="mb-2 block">اختر الكورس</Label>
+            <Label className="mb-2 block">اختر البرنامج</Label>
             <Select
               value={String(selectedCourseId)}
               onValueChange={(v) => setSelectedCourseId(Number(v))}
             >
               <SelectTrigger className="w-full md:w-96">
-                <SelectValue placeholder="اختر كورساً" />
+                <SelectValue placeholder="اختر برنامجًا" />
               </SelectTrigger>
               <SelectContent>
                 {courses?.map((course) => (
@@ -317,7 +317,7 @@ export default function AdminLessons() {
         {selectedCourseId > 0 && (
           <Card className="border-0 shadow-md">
             <CardHeader>
-              <CardTitle>دروس الكورس</CardTitle>
+              <CardTitle>دروس البرنامج</CardTitle>
             </CardHeader>
 
             <CardContent className="p-0">
@@ -425,7 +425,7 @@ export default function AdminLessons() {
                     {(!lessons || lessons.length === 0) && (
                       <tr>
                         <td colSpan={6} className="py-8 text-center text-slate-400">
-                          لا توجد دروس في هذا الكورس
+                          لا توجد دروس في هذا البرنامج
                         </td>
                       </tr>
                     )}

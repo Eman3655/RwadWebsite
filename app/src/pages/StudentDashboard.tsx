@@ -149,7 +149,7 @@ export default function StudentDashboard() {
                 </h1>
 
                 <p className="text-slate-600 mt-3 max-w-xl">
-                  تابع كورساتك وتقدمك وشهاداتك بطريقة هادئة ومنظمة.
+                  تابع برامجك وتقدمك وشهاداتك بطريقة هادئة ومنظمة.
                 </p>
               </div>
 
@@ -165,13 +165,13 @@ export default function StudentDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
             <StatCard
-              title="كورساتي"
+              title="برامجي"
               value={totalCourses}
               icon={BookOpen}
               color={palette[0]}
             />
             <StatCard
-              title="كورسات مكتملة"
+              title="برامج مكتملة"
               value={completedCourses}
               icon={CheckCircle}
               color={palette[1]}
@@ -199,7 +199,7 @@ export default function StudentDashboard() {
             خريطة التقدم
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            نظرة هادئة على تقدمك في الكورسات المسجل بها.
+            تقدمك في البرامج المسجل بها.
           </p>
         </div>
       </div>
@@ -272,7 +272,7 @@ export default function StudentDashboard() {
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h2 className="text-xl font-bold text-slate-900">
-                        كورساتي الحالية
+                        برامجي الحالية
                       </h2>
                       <p className="text-sm text-slate-500 mt-1">
                         أكمل رحلتك من حيث توقفت.
@@ -281,7 +281,7 @@ export default function StudentDashboard() {
 
                     <Link to="/courses">
                       <Button variant="outline">
-                        تصفح الكورسات
+                        تصفح البرامج
                       </Button>
                     </Link>
                   </div>
@@ -289,7 +289,7 @@ export default function StudentDashboard() {
                   {enrolledCourses.length === 0 ? (
                     <div className="text-center py-14">
                       <BookOpen className="h-14 w-14 mx-auto mb-3 text-slate-300" />
-                      <p className="text-slate-500">لم تسجل في أي كورس بعد</p>
+                      <p className="text-slate-500">لم تسجل في أي برنامج بعد</p>
                       <Link to="/courses">
                         <Button className="mt-4 bg-blue-600 hover:bg-blue-700">
                           ابدأ الآن
@@ -382,7 +382,7 @@ export default function StudentDashboard() {
                   </h3>
 
                   <p className="text-sm text-slate-600 mb-4">
-                    شاهد الشهادات التي حصلت عليها من الكورسات.
+                     الشهادات التي حصلت عليها من البرامج.
                   </p>
 
                   <Link to="/certificates">
@@ -396,7 +396,7 @@ export default function StudentDashboard() {
               <Card className="border-0 shadow-sm rounded-[2rem]">
                 <CardContent className="p-6">
                   <h3 className="font-bold text-slate-900 mb-4">
-                    ملخص هادئ
+                    ملخص
                   </h3>
 
                   <div className="space-y-4">
@@ -424,7 +424,7 @@ export default function StudentDashboard() {
                         >
                           {totalCourses}
                         </div>
-                        <div className="text-xs text-slate-500">كورسات</div>
+                        <div className="text-xs text-slate-500">برامج</div>
                       </div>
 
                       <div

@@ -12,6 +12,9 @@ import {
   GraduationCap,
   Award,
   Target,
+  Home,
+  BookOpen,
+  TrendingUp,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -20,117 +23,134 @@ export default function Navbar() {
   const location = useLocation();
 
   const isAdmin = user?.role === "admin";
-  const isActive = (path: string) => location.pathname === path;
 
-  const navLinks = [
-    { path: "/", label: "الرئيسية" },
-    { path: "/courses", label: "الكورسات" },
-    { path: "/student-dashboard", label: "تقدمي" },
-    ...(isAuthenticated && !isAdmin
-      ? [{ path: "/habits", label: "عاداتي" }]
-      : []),
+  const isActive = (path: string) => {
+    if (path === "/") return location.pathname === "/";
+    return location.pathname.startsWith(path);
+  };
+
+  const closeMenu = () => setIsOpen(false);
+
+  const publicLinks = [
+    { path: "/", label: "الرئيسية", icon: Home },
+    { path: "/courses", label: "البرامج", icon: BookOpen },
   ];
 
+  const studentLinks =
+    isAuthenticated && !isAdmin
+      ? [
+          { path: "/student-dashboard", label: "تقدمي", icon: TrendingUp },
+          { path: "/habits", label: "عاداتي", icon: Target },
+          { path: "/certificates", label: "شهاداتي", icon: Award },
+        ]
+      : [];
+
+  const adminLinks =
+    isAuthenticated && isAdmin
+      ? [{ path: "/dashboard", label: "لوحة التحكم", icon: LayoutDashboard }]
+      : [];
+
+  const navLinks = [...publicLinks, ...studentLinks, ...adminLinks];
+
+  const handleLogout = () => {
+    logout();
+    closeMenu();
+  };
+
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-200 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center">
+          <Link to="/" className="flex items-center gap-3 shrink-0">
+            <div className="w-10 h-10 bg-blue-700 rounded-2xl flex items-center justify-center shadow-sm">
               <GraduationCap className="h-5 w-5 text-white" />
             </div>
 
-            <span className="text-xl font-bold text-slate-900">
-              أكاديمية الرواد
-            </span>
+            <div className="leading-tight">
+              <div className="text-lg font-extrabold text-slate-900">
+                أكاديمية الرواد
+              </div>
+              <div className="hidden sm:block text-xs text-slate-400">
+                منصة تعليمية متكاملة
+              </div>
+            </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-1">
-            {navLinks.map((link) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive(link.path)
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
+          <div className="hidden lg:flex items-center gap-1">
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const active = isActive(link.path);
 
-            {isAdmin && (
-              <Link
-                to="/dashboard"
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  isActive("/dashboard")
-                    ? "bg-blue-50 text-blue-700"
-                    : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                لوحة التحكم
-              </Link>
-            )}
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold transition ${
+                    active
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {link.label}
+                </Link>
+              );
+            })}
           </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-3">
             {isAuthenticated && <NotificationsBell />}
 
             {isAuthenticated && user ? (
-              <div className="flex items-center gap-3">
-                {isAdmin && (
-                  <Link to="/dashboard">
-                    <Button variant="ghost" size="sm" className="text-slate-600">
-                      <LayoutDashboard className="h-4 w-4 ml-2" />
-                      لوحة التحكم
-                    </Button>
-                  </Link>
-                )}
-
-                {!isAdmin && (
-                  <Link to="/habits">
-                    <Button variant="ghost" size="sm" className="text-slate-600">
-                      <Target className="h-4 w-4 ml-2" />
-                      عاداتي
-                    </Button>
-                  </Link>
-                )}
-
-                <Link to="/certificates">
-                  <Button variant="ghost" size="sm" className="text-slate-600">
-                    <Award className="h-4 w-4 ml-2" />
-                    شهاداتي
-                  </Button>
-                </Link>
-
+              <>
                 <Link to="/profile">
-                  <Button variant="ghost" size="sm" className="text-slate-600">
-                    <User className="h-4 w-4 ml-2" />
-                    {user.name}
+                  <Button
+                    variant="ghost"
+                    className={`rounded-2xl px-2 pr-2 pl-4 ${
+                      isActive("/profile")
+                        ? "bg-blue-50 text-blue-700"
+                        : "text-slate-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
+                        {user.avatar ? (
+                          <img
+                            src={user.avatar}
+                            alt={user.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="h-4 w-4" />
+                        )}
+                      </div>
+
+                      <span className="max-w-[120px] truncate">
+                        {user.name}
+                      </span>
+                    </div>
                   </Button>
                 </Link>
 
                 <Button
                   variant="ghost"
-                  size="sm"
-                  onClick={logout}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  onClick={handleLogout}
+                  className="rounded-2xl text-red-500 hover:text-red-600 hover:bg-red-50"
                 >
                   <LogOut className="h-4 w-4 ml-2" />
                   خروج
                 </Button>
-              </div>
+              </>
             ) : (
               <div className="flex items-center gap-2">
                 <Link to="/login">
-                  <Button variant="ghost" size="sm" className="text-slate-600">
+                  <Button variant="ghost" className="rounded-2xl text-slate-600">
                     تسجيل الدخول
                   </Button>
                 </Link>
 
                 <Link to="/register">
-                  <Button size="sm" className="bg-blue-600 hover:bg-blue-700">
+                  <Button className="rounded-2xl bg-blue-700 hover:bg-blue-800">
                     حساب جديد
                   </Button>
                 </Link>
@@ -138,90 +158,101 @@ export default function Navbar() {
             )}
           </div>
 
-          <button
-            className="md:hidden p-2 rounded-lg hover:bg-slate-100"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+<div className="lg:hidden flex items-center gap-2">
+  {isAuthenticated && <NotificationsBell />}
+
+  <button
+    className="p-2 rounded-2xl hover:bg-slate-100"
+    onClick={() => setIsOpen((prev) => !prev)}
+  >
+    {isOpen ? (
+      <X className="h-6 w-6 text-slate-700" />
+    ) : (
+      <Menu className="h-6 w-6 text-slate-700" />
+    )}
+  </button>
+</div>
         </div>
       </div>
 
       {isOpen && (
-        <div className="md:hidden border-t bg-white px-4 py-4 space-y-2 animate-fadeIn">
-          {isAuthenticated && (
-            <div className="px-2 py-2">
-              <NotificationsBell />
-            </div>
-          )}
-
-          {navLinks.map((link) => (
-            <Link
-              key={link.path}
-              to={link.path}
-              className="block px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100"
-              onClick={() => setIsOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
-
-          {isAuthenticated && (
-            <Link
-              to="/certificates"
-              className="block px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100"
-              onClick={() => setIsOpen(false)}
-            >
-              <Award className="h-4 w-4 inline ml-2" />
-              شهاداتي
-            </Link>
-          )}
-
-          {isAdmin && (
-            <Link
-              to="/dashboard"
-              className="block px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100"
-              onClick={() => setIsOpen(false)}
-            >
-              لوحة التحكم
-            </Link>
-          )}
-
-          {isAuthenticated && user ? (
-            <>
+        <div className="lg:hidden border-t border-slate-100 bg-white shadow-lg">
+          <div className="px-4 py-4 space-y-2">
+            {isAuthenticated && user && (
               <Link
                 to="/profile"
-                className="block px-4 py-2 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100"
-                onClick={() => setIsOpen(false)}
+                onClick={closeMenu}
+                className="flex items-center gap-3 p-3 rounded-3xl bg-slate-50 border border-slate-100 mb-3"
               >
-                <User className="h-4 w-4 inline ml-2" />
-                {user.name}
-              </Link>
+                <div className="w-11 h-11 rounded-full overflow-hidden bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-5 w-5" />
+                  )}
+                </div>
 
+                <div className="min-w-0">
+                  <div className="font-bold text-slate-900 truncate">
+                    {user.name}
+                  </div>
+                  <div className="text-xs text-slate-500 truncate">
+                    {user.email}
+                  </div>
+                </div>
+              </Link>
+            )}
+
+
+            {navLinks.map((link) => {
+              const Icon = link.icon;
+              const active = isActive(link.path);
+
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={closeMenu}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition ${
+                    active
+                      ? "bg-blue-50 text-blue-700"
+                      : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  {link.label}
+                </Link>
+              );
+            })}
+
+            {isAuthenticated && user ? (
               <button
-                className="w-full text-right px-4 py-2 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50"
-                onClick={() => {
-                  logout();
-                  setIsOpen(false);
-                }}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-red-500 hover:bg-red-50"
+                onClick={handleLogout}
               >
-                <LogOut className="h-4 w-4 inline ml-2" />
+                <LogOut className="h-4 w-4" />
                 تسجيل الخروج
               </button>
-            </>
-          ) : (
-            <div className="flex gap-2 pt-2">
-              <Link to="/login" className="flex-1" onClick={() => setIsOpen(false)}>
-                <Button variant="outline" className="w-full">
-                  تسجيل الدخول
-                </Button>
-              </Link>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 pt-2">
+                <Link to="/login" onClick={closeMenu}>
+                  <Button variant="outline" className="w-full rounded-2xl">
+                    تسجيل الدخول
+                  </Button>
+                </Link>
 
-              <Link to="/register" className="flex-1" onClick={() => setIsOpen(false)}>
-                <Button className="w-full bg-blue-600">حساب جديد</Button>
-              </Link>
-            </div>
-          )}
+                <Link to="/register" onClick={closeMenu}>
+                  <Button className="w-full rounded-2xl bg-blue-700 hover:bg-blue-800">
+                    حساب جديد
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </nav>
