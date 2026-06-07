@@ -402,9 +402,6 @@ export default function AdminCourses() {
                             <div className="font-medium text-slate-900">
                               {course.title}
                             </div>
-                            <div className="text-sm text-slate-500">
-                              {course.instructorName}
-                            </div>
                           </div>
                         </div>
                       </td>

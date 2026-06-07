@@ -130,14 +130,6 @@ export default function CourseDetail() {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="bg-white/80 border border-white rounded-2xl p-4">
-                  <GraduationCap className="h-5 w-5 text-blue-700 mb-2" />
-                  <div className="text-xs text-slate-500">المعلم</div>
-                  <div className="text-sm font-bold text-slate-900 line-clamp-1">
-                    {course.instructorName || "غير معروف"}
-                  </div>
-                </div>
-
-                <div className="bg-white/80 border border-white rounded-2xl p-4">
                   <Clock className="h-5 w-5 text-blue-700 mb-2" />
                   <div className="text-xs text-slate-500">المدة</div>
                   <div className="text-sm font-bold text-slate-900">
@@ -167,7 +159,7 @@ export default function CourseDetail() {
               <CardContent className="p-6 text-center">
 
                 <div className="text-4xl font-extrabold text-blue-700 mb-2">
-                  حيهلاً 😊
+                  حيّهلا 😊
                 </div>
                 <br></br>
                 <div className="text-sm text-slate-500 mb-6">
@@ -278,11 +270,6 @@ export default function CourseDetail() {
                                 <h3 className="font-semibold text-slate-900 line-clamp-1">
                                   {lesson.title}
                                 </h3>
-                                {lesson.isFree && (
-                                  <Badge className="bg-blue-100 text-blue-700 text-xs">
-                                    مجاني
-                                  </Badge>
-                                )}
                               </div>
                               <p className="text-sm text-slate-500 line-clamp-1">
                                 {lesson.description || `${lesson.duration} دقيقة`}

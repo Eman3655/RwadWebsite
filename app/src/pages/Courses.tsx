@@ -11,13 +11,11 @@ import Footer from "@/components/Footer";
 import {
   BookOpen,
   Clock,
-  Users,
   Star,
   Search,
   ChevronLeft,
   Layers,
   Sparkles,
-  Loader2,
 } from "lucide-react";
 
 const levelLabels: Record<string, string> = {
@@ -55,16 +53,8 @@ export default function Courses() {
   const filters = [
     { label: "الكل", value: "", color: "bg-blue-700 hover:bg-blue-800" },
     { label: "مبتدئ", value: "beginner", color: "bg-green-600 hover:bg-green-700" },
-    {
-      label: "متوسط",
-      value: "intermediate",
-      color: "bg-orange-500 hover:bg-orange-600",
-    },
-    {
-      label: "متقدم",
-      value: "advanced",
-      color: "bg-purple-600 hover:bg-purple-700",
-    },
+    { label: "متوسط", value: "intermediate", color: "bg-orange-500 hover:bg-orange-600" },
+    { label: "متقدم", value: "advanced", color: "bg-purple-600 hover:bg-purple-700" },
   ];
 
   return (
@@ -173,19 +163,17 @@ export default function Courses() {
         <section className="pb-14">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <Card
                     key={i}
-                    className="overflow-hidden border-0 shadow-sm rounded-[2rem] animate-pulse"
+                    className="overflow-hidden border-0 shadow-md rounded-3xl animate-pulse"
                   >
-                    <div className="h-44 bg-slate-200" />
-
+                    <div className="h-48 bg-slate-200" />
                     <CardContent className="p-5 space-y-4">
                       <div className="h-5 bg-slate-200 rounded w-3/4" />
                       <div className="h-4 bg-slate-200 rounded w-full" />
                       <div className="h-4 bg-slate-200 rounded w-2/3" />
-                      <div className="h-10 bg-slate-200 rounded-2xl w-full" />
                     </CardContent>
                   </Card>
                 ))}
@@ -209,7 +197,7 @@ export default function Courses() {
               <>
                 <motion.div
                   variants={fadeUp}
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
                   {courses.map((course, index) => (
                     <motion.div
@@ -218,80 +206,58 @@ export default function Courses() {
                       transition={{ delay: index * 0.035 }}
                     >
                       <Link to={`/courses/${course.id}`}>
-                        <Card className="overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-[2rem] h-full bg-white group">
-                          <div className="relative h-44 bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center overflow-hidden">
+                        <Card className="overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 rounded-3xl h-full bg-white group">
+                          <div className="relative h-48 bg-gradient-to-br from-blue-500 to-indigo-600">
                             {course.image ? (
                               <img
                                 src={course.image}
                                 alt={course.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                className="w-full h-full object-cover"
                               />
                             ) : (
-                              <div className="flex flex-col items-center text-white">
+                              <div className="h-full flex flex-col items-center justify-center text-white">
                                 <BookOpen className="h-14 w-14 mb-2 opacity-90" />
-                                <span className="text-base font-semibold opacity-95">
+                                <span className="font-semibold">
                                   {course.categoryName || "قسم عام"}
                                 </span>
                               </div>
                             )}
 
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-transparent to-transparent" />
-
                             <Badge
                               className={`absolute top-4 right-4 rounded-full ${
-                                levelColors[course.level] ??
-                                levelColors.beginner
+                                levelColors[course.level] ?? levelColors.beginner
                               }`}
                             >
                               {levelLabels[course.level] ?? "مبتدئ"}
                             </Badge>
+                          </div>
 
-                            <div className="absolute bottom-4 right-4 left-4 flex items-center justify-between">
-                              <div className="flex items-center gap-1 text-white text-sm">
+                          <CardContent className="p-5">
+                            <h3 className="text-lg font-bold text-slate-900 line-clamp-1">
+                              {course.title}
+                            </h3>
+
+                            <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-6">
+                              {course.description ||
+                                "وصف البرنامج غير متوفر حالياً."}
+                            </p>
+
+                            <div className="flex items-center justify-between mt-5 text-sm text-slate-500">
+                              <div className="flex items-center gap-1">
                                 <Layers className="h-4 w-4" />
                                 <span>{course.categoryName || "قسم عام"}</span>
                               </div>
 
-                            </div>
-                          </div>
-
-                          <CardContent className="p-5">
-                            <h3 className="text-lg font-extrabold text-slate-900 line-clamp-1">
-                              {course.title}
-                            </h3>
-
-                            <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-6 min-h-[48px]">
-                              {course.description || "لا يوجد وصف لهذا البرنامج."}
-                            </p>
-
-                            <div className="grid grid-cols-2 gap-3 mt-5">
-                              <div className="rounded-2xl bg-slate-50 p-3">
-                                <div className="flex items-center gap-2 text-slate-500 text-xs mb-1">
-                                  <Users className="h-4 w-4" />
-                                  المعلم
-                                </div>
-
-                                <div className="text-sm font-bold text-slate-800 line-clamp-1">
-                                  {course.instructorName || "غير معروف"}
-                                </div>
-                              </div>
-
-                              <div className="rounded-2xl bg-slate-50 p-3">
-                                <div className="flex items-center gap-2 text-slate-500 text-xs mb-1">
-                                  <Clock className="h-4 w-4" />
-                                  المدة
-                                </div>
-
-                                <div className="text-sm font-bold text-slate-800">
-                                  {course.duration} ساعة
-                                </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="h-4 w-4" />
+                                <span>{course.duration} ساعة</span>
                               </div>
                             </div>
 
                             <div className="mt-5 pt-4 border-t flex items-center justify-between">
                               <div className="flex items-center gap-1 text-amber-500">
                                 <Star className="h-4 w-4 fill-amber-500" />
-                                <span className="text-sm font-bold">
+                                <span className="text-sm font-medium">
                                   {course.totalLessons} درس
                                 </span>
                               </div>
