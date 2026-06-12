@@ -8,7 +8,6 @@
     "types": ["node", "vitest/globals"],
     "skipLibCheck": true,
     "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
     "moduleDetection": "force",
     "noEmit": true,
     "strict": true,
