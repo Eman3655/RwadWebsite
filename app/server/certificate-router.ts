@@ -1,6 +1,6 @@
 import { createRouter, authedQuery, adminQuery } from "./middleware";
 import { z } from "zod";
-import { getDb } from "./queries/connection";
+import { getDb } from "../server/queries/connection";
 import { certificates, courses, users } from "@db/schema";
 import { eq, desc, and } from "drizzle-orm";
 

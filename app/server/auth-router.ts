@@ -1,13 +1,13 @@
 import * as cookie from "cookie";
 import { Session } from "@contracts/constants";
-import { getSessionCookieOptions } from "./lib/cookies";
+import { getSessionCookieOptions } from "../server/lib/cookies";
 import { createRouter, publicQuery, authedQuery } from "./middleware";
 import { z } from "zod";
-import { getDb } from "./queries/connection";
+import { getDb } from "../server/queries/connection";
 import { users } from "@db/schema";
 import { eq } from "drizzle-orm";
 import * as jose from "jose";
-import { env } from "./lib/env";
+import { env } from "../server/lib/env";
 import bcrypt from "bcryptjs";
 
 const JWT_ALG = "HS256";

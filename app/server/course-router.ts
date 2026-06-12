@@ -1,6 +1,6 @@
 import { createRouter, publicQuery, authedQuery, adminQuery } from "./middleware";
 import { z } from "zod";
-import { getDb } from "./queries/connection";
+import { getDb } from "../server/queries/connection";
 import {
   courses,
   lessons,
