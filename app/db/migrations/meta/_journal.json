@@ -8,6 +8,13 @@
       "when": 1780821754266,
       "tag": "0000_outgoing_the_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1781453959543,
+      "tag": "0001_lazy_the_stranger",
+      "breakpoints": true
     }
   ]
 }

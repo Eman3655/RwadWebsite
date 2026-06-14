@@ -226,3 +226,17 @@ export const habits = pgTable("habits", {
 
 export type SelectHabit = typeof habits.$inferSelect;
 export type InsertHabit = typeof habits.$inferInsert;
+
+
+export const courseAttachments = pgTable("course_attachments", {
+  id: serial("id").primaryKey(),
+  courseId: integer("course_id").notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  fileUrl: varchar("file_url", { length: 1000 }).notNull(),
+  fileType: varchar("file_type", { length: 100 }),
+  fileSize: integer("file_size"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type SelectCourseAttachment = typeof courseAttachments.$inferSelect;
+export type InsertCourseAttachment = typeof courseAttachments.$inferInsert;

@@ -20,6 +20,8 @@ import AdminNotifications from "./pages/AdminNotifications";
 import Notifications from "./pages/Notifications";
 import Habits from "./pages/Habits";
 import AdminHabits from "./pages/AdminHabits";
+import AdminCourseAttachments from "./pages/AdminCourseAttachments";
+
 export default function App() {
   return (
     <Routes>
@@ -34,6 +36,7 @@ export default function App() {
       <Route path="/student-dashboard" element={<StudentDashboard />} />
       <Route path="/habits" element={<Habits />} />
       <Route path="/dashboard" element={<Dashboard />} />
+      <Route path="/dashboard/attachments" element={<AdminCourseAttachments />} />
       <Route path="/dashboard/courses" element={<AdminCourses />} />
       <Route path="/dashboard/lessons" element={<AdminLessons />} />
       <Route path="/dashboard/quizzes" element={<AdminQuizzes />} />

@@ -7,11 +7,13 @@ import { dashboardRouter } from "./dashboard-router";
 import { certificateRouter } from "./certificate-router";
 import { notificationRouter } from "./notification-router";
 import { habitRouter } from "./habit-router";
+import { courseAttachmentRouter } from "./course-attachment-router";
 
 export const appRouter = createRouter({
   ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),
 
   auth: authRouter,
+  courseAttachment: courseAttachmentRouter,
   habit: habitRouter,
   course: courseRouter,
   lesson: lessonRouter,

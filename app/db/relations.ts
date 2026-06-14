@@ -12,6 +12,7 @@ import {
   certificates,
   notifications,
   habits,
+  courseAttachments,
 } from "./schema";
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -40,6 +41,7 @@ export const coursesRelations = relations(courses, ({ one, many }) => ({
   quizzes: many(quizzes),
   enrollments: many(enrollments),
   certificates: many(certificates),
+  attachments: many(courseAttachments),
 }));
 
 export const lessonsRelations = relations(lessons, ({ one, many }) => ({
@@ -124,3 +126,13 @@ export const habitsRelations = relations(habits, ({ one }) => ({
     references: [users.id],
   }),
 }));
+
+export const courseAttachmentsRelations = relations(
+  courseAttachments,
+  ({ one }) => ({
+    course: one(courses, {
+      fields: [courseAttachments.courseId],
+      references: [courses.id],
+    }),
+  }),
+);

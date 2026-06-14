@@ -90,6 +90,8 @@ app.post("/api/upload/course-image", async (c) => {
   }
 });
 
+
+
 app.post("/api/upload/avatar", async (c) => {
   try {
     const body = await c.req.parseBody();
@@ -108,6 +110,69 @@ app.post("/api/upload/avatar", async (c) => {
     return c.json(
       {
         message: error instanceof Error ? error.message : "Avatar upload failed",
+      },
+      500,
+    );
+  }
+});
+
+
+async function uploadFileToCloudinary(file: File, folder: string) {
+  if (!(file instanceof File)) {
+    throw new Error("No file uploaded");
+  }
+
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error("Cloudinary is not configured");
+  }
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  const uploadResult = await new Promise<any>((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder,
+          resource_type: "auto",
+          use_filename: true,
+          unique_filename: true,
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        },
+      )
+      .end(buffer);
+  });
+
+  return {
+    url: uploadResult.secure_url as string,
+    fileType: file.type || uploadResult.resource_type,
+    fileSize: file.size,
+  };
+}
+
+app.post("/api/upload/course-attachment", async (c) => {
+  try {
+    const body = await c.req.parseBody();
+    const file = body["file"];
+
+    if (!(file instanceof File)) {
+      return c.json({ message: "No file uploaded" }, 400);
+    }
+
+    const result = await uploadFileToCloudinary(file, "alrowad/attachments");
+
+    return c.json(result);
+  } catch (error) {
+    console.error("Course attachment upload failed:", error);
+
+    return c.json(
+      {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Course attachment upload failed",
       },
       500,
     );

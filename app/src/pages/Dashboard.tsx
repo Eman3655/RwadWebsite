@@ -19,6 +19,7 @@ import {
   BarChart3,
   Activity,
   CheckCircle,
+  Paperclip,
 } from "lucide-react";
 
 import {
@@ -212,6 +213,7 @@ enrollments.forEach((item: any) => {
 
   const quickActions = [
     { label: "إدارة البرامج", link: "/dashboard/courses", icon: BookOpen },
+    { label: "إدارة المرفقات", link: "/dashboard/attachments", icon: Paperclip },
     { label: "إدارة الدروس", link: "/dashboard/lessons", icon: FileText },
     { label: "إدارة الاختبارات", link: "/dashboard/quizzes", icon: HelpCircle },
     { label: "إدارة الطلاب", link: "/dashboard/students", icon: Users },
