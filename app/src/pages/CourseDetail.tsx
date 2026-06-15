@@ -337,6 +337,71 @@ export default function CourseDetail() {
               <Card className="border-0 shadow-sm rounded-[2rem]">
                 <CardContent className="p-6">
                   <h2 className="text-2xl font-extrabold text-slate-900 mb-1">
+                    المرفقات
+                  </h2>
+
+                  <p className="text-sm text-slate-500 mb-6">
+                    الكتب والملفات المرجعية الخاصة بالبرنامج.
+                  </p>
+
+                  {!attachments || attachments.length === 0 ? (
+                    <div className="p-8 rounded-3xl bg-slate-50 text-center text-slate-500">
+                      <Paperclip className="h-10 w-10 mx-auto mb-2 text-slate-300" />
+                      لا توجد مرفقات
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {attachments.map((file) => (
+                        <Card
+                          key={file.id}
+                          className="border border-slate-100 shadow-sm rounded-3xl bg-slate-50"
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                                <FileText className="h-5 w-5" />
+                              </div>
+
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-bold text-slate-900 line-clamp-1">
+                                  {file.title}
+                                </h3>
+
+                                <div className="text-xs text-slate-500 mt-1">
+                                  {file.fileType || "ملف"}
+                                  {file.fileSize
+                                    ? ` • ${formatFileSize(file.fileSize)}`
+                                    : ""}
+                                </div>
+                              </div>
+                            </div>
+
+                            <a
+                              href={file.fileUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="w-full rounded-2xl bg-white border-blue-600 text-blue-700 hover:bg-blue-50 mt-4"
+                              >
+                                <Download className="h-4 w-4 ml-1" />
+                                فتح / تحميل
+                              </Button>
+                            </a>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+             
+              </Card>
+
+                            <Card className="border-0 shadow-sm rounded-[2rem]">
+                <CardContent className="p-6">
+                  <h2 className="text-2xl font-extrabold text-slate-900 mb-1">
                     الاختبارات
                   </h2>
 
@@ -391,70 +456,6 @@ export default function CourseDetail() {
                                 سجل للوصول
                               </Button>
                             )}
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              <Card className="border-0 shadow-sm rounded-[2rem]">
-                <CardContent className="p-6">
-                  <h2 className="text-2xl font-extrabold text-slate-900 mb-1">
-                    المرفقات
-                  </h2>
-
-                  <p className="text-sm text-slate-500 mb-6">
-                    الكتب والملفات المرجعية الخاصة بالبرنامج.
-                  </p>
-
-                  {!attachments || attachments.length === 0 ? (
-                    <div className="p-8 rounded-3xl bg-slate-50 text-center text-slate-500">
-                      <Paperclip className="h-10 w-10 mx-auto mb-2 text-slate-300" />
-                      لا توجد مرفقات
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {attachments.map((file) => (
-                        <Card
-                          key={file.id}
-                          className="border border-slate-100 shadow-sm rounded-3xl bg-slate-50"
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3">
-                              <div className="w-10 h-10 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
-                                <FileText className="h-5 w-5" />
-                              </div>
-
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-slate-900 line-clamp-1">
-                                  {file.title}
-                                </h3>
-
-                                <div className="text-xs text-slate-500 mt-1">
-                                  {file.fileType || "ملف"}
-                                  {file.fileSize
-                                    ? ` • ${formatFileSize(file.fileSize)}`
-                                    : ""}
-                                </div>
-                              </div>
-                            </div>
-
-                            <a
-                              href={file.fileUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                            >
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                className="w-full rounded-2xl bg-white border-blue-600 text-blue-700 hover:bg-blue-50 mt-4"
-                              >
-                                <Download className="h-4 w-4 ml-1" />
-                                فتح / تحميل
-                              </Button>
-                            </a>
                           </CardContent>
                         </Card>
                       ))}
