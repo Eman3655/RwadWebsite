@@ -4,6 +4,7 @@ import { getDb } from "../server/queries/connection";
 import {
   courses,
   lessons,
+  lessonProgress,
   quizzes,
   enrollments,
   categories,
@@ -261,29 +262,62 @@ const conditions: SQL[] = [];
       return { success: true, enrollmentId: created.id };
     }),
 
-  myCourses: authedQuery.query(async ({ ctx }) => {
-    const db = getDb();
+myCourses: authedQuery.query(async ({ ctx }) => {
+  const db = getDb();
 
-    return db
-      .select({
-        id: courses.id,
-        title: courses.title,
-        description: courses.description,
-        image: courses.image,
-        price: courses.price,
-        duration: courses.duration,
-        level: courses.level,
-        totalLessons: courses.totalLessons,
-        totalQuizzes: courses.totalQuizzes,
-        progress: enrollments.progress,
-        status: enrollments.status,
-        enrolledAt: enrollments.enrolledAt,
-      })
-      .from(enrollments)
-      .innerJoin(courses, eq(enrollments.courseId, courses.id))
-      .where(eq(enrollments.studentId, ctx.user.id))
-      .orderBy(desc(enrollments.enrolledAt));
-  }),
+  const rows = await db
+    .select({
+      enrollmentId: enrollments.id,
+      id: courses.id,
+      title: courses.title,
+      description: courses.description,
+      image: courses.image,
+      price: courses.price,
+      duration: courses.duration,
+      level: courses.level,
+      totalLessons: courses.totalLessons,
+      totalQuizzes: courses.totalQuizzes,
+      status: enrollments.status,
+      enrolledAt: enrollments.enrolledAt,
+    })
+    .from(enrollments)
+    .innerJoin(courses, eq(enrollments.courseId, courses.id))
+    .where(eq(enrollments.studentId, ctx.user.id))
+    .orderBy(desc(enrollments.enrolledAt));
+
+  return Promise.all(
+    rows.map(async (course) => {
+      const allLessons = await db
+        .select({ id: lessons.id })
+        .from(lessons)
+        .where(eq(lessons.courseId, course.id));
+
+      const completedLessons = await db
+        .select({ id: lessonProgress.id })
+        .from(lessonProgress)
+        .innerJoin(lessons, eq(lessonProgress.lessonId, lessons.id))
+        .where(
+          and(
+            eq(lessonProgress.enrollmentId, course.enrollmentId),
+            eq(lessons.courseId, course.id),
+            eq(lessonProgress.isCompleted, true),
+          ),
+        );
+
+      const progress =
+        allLessons.length > 0
+          ? Math.round((completedLessons.length / allLessons.length) * 100)
+          : 0;
+
+      return {
+        ...course,
+        progress,
+        completedLessons: completedLessons.length,
+        lessonCount: allLessons.length,
+      };
+    }),
+  );
+}),
 
   stats: publicQuery.query(async () => {
     const db = getDb();
