@@ -22,10 +22,12 @@ async function recalculateCourseProgress(enrollmentId: number, courseId: number)
       ),
     );
 
-  const progress =
+  const lessonProgressPercent =
     allLessons.length > 0
       ? Math.round((completedLessons.length / allLessons.length) * 100)
       : 0;
+
+  const progress = lessonProgressPercent;
 
   await db
     .update(enrollments)
