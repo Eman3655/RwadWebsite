@@ -8,26 +8,26 @@ async function recalculateCourseProgress(enrollmentId: number, courseId: number)
   const db = getDb();
 
   const allLessons = await db
-    .select()
+    .select({ id: lessons.id })
     .from(lessons)
     .where(eq(lessons.courseId, courseId));
 
   const completedLessons = await db
-    .select()
+    .select({ id: lessonProgress.id })
     .from(lessonProgress)
+    .innerJoin(lessons, eq(lessonProgress.lessonId, lessons.id))
     .where(
       and(
         eq(lessonProgress.enrollmentId, enrollmentId),
+        eq(lessons.courseId, courseId),
         eq(lessonProgress.isCompleted, true),
       ),
     );
 
-  const lessonProgressPercent =
+  const progress =
     allLessons.length > 0
       ? Math.round((completedLessons.length / allLessons.length) * 100)
       : 0;
-
-  const progress = lessonProgressPercent;
 
   await db
     .update(enrollments)
@@ -39,6 +39,19 @@ async function recalculateCourseProgress(enrollmentId: number, courseId: number)
     .where(eq(enrollments.id, enrollmentId));
 
   return progress;
+}
+
+async function recalculateAllCourseEnrollments(courseId: number) {
+  const db = getDb();
+
+  const courseEnrollments = await db
+    .select({ id: enrollments.id })
+    .from(enrollments)
+    .where(eq(enrollments.courseId, courseId));
+
+  for (const enrollment of courseEnrollments) {
+    await recalculateCourseProgress(enrollment.id, courseId);
+  }
 }
 
 export const lessonRouter = createRouter({
@@ -91,7 +104,7 @@ export const lessonRouter = createRouter({
         .returning({ id: lessons.id });
 
       const lessonCount = await db
-        .select()
+        .select({ id: lessons.id })
         .from(lessons)
         .where(eq(lessons.courseId, input.courseId));
 
@@ -99,6 +112,8 @@ export const lessonRouter = createRouter({
         .update(courses)
         .set({ totalLessons: lessonCount.length })
         .where(eq(courses.id, input.courseId));
+
+      await recalculateAllCourseEnrollments(input.courseId);
 
       return { id: created.id };
     }),
@@ -138,17 +153,21 @@ export const lessonRouter = createRouter({
         .limit(1);
 
       if (lesson.length > 0) {
+        const courseId = lesson[0].courseId;
+
         await db.delete(lessons).where(eq(lessons.id, input.id));
 
         const lessonCount = await db
-          .select()
+          .select({ id: lessons.id })
           .from(lessons)
-          .where(eq(lessons.courseId, lesson[0].courseId));
+          .where(eq(lessons.courseId, courseId));
 
         await db
           .update(courses)
           .set({ totalLessons: lessonCount.length })
-          .where(eq(courses.id, lesson[0].courseId));
+          .where(eq(courses.id, courseId));
+
+        await recalculateAllCourseEnrollments(courseId);
       }
 
       return { success: true };
