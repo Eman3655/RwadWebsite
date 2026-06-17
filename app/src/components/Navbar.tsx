@@ -40,7 +40,7 @@ export default function Navbar() {
     isAuthenticated && !isAdmin
       ? [
           { path: "/student-dashboard", label: "تقدمي", icon: TrendingUp },
-          { path: "/habits", label: "عاداتي", icon: Target },
+          { path: "/habits", label: "وردي", icon: Target },
           { path: "/certificates", label: "شهاداتي", icon: Award },
         ]
       : [];
