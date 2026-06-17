@@ -141,7 +141,7 @@ export default function Habits() {
                 </h1>
 
                 <p className="text-slate-600 mt-3 max-w-xl">
-                 ما لا يسعني تركه في يومي و ليلتي
+                 ما لا يسعني تركه في يومي و ليلتي , خطوات صغيرة متواصلة تصنع إنجازاً كبيراً.
                 </p>
               </div>
 

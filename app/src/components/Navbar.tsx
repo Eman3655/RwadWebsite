@@ -68,7 +68,7 @@ export default function Navbar() {
 
             <div className="leading-tight">
               <div className="text-lg font-extrabold text-slate-900">
-                أكاديمية الرواد
+                مخيم الرواد
               </div>
               <div className="hidden sm:block text-xs text-slate-400">
                 منصة تعليمية متكاملة

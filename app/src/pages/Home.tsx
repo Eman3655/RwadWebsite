@@ -161,7 +161,7 @@ export default function Home() {
               >
                 تعلّم بوضوح مع
                 <span className="block text-blue-700 mt-2">
-                  أكاديمية الرواد
+                  مخيم الرواد
                 </span>
               </motion.h1>
 
@@ -435,7 +435,7 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4">
           <motion.div variants={cardSoftReveal} className="text-center mb-10">
             <h2 className="text-3xl font-extrabold text-slate-900">
-              لماذا أكاديمية الرواد؟
+              لماذا مخيم الرواد؟
             </h2>
             <p className="text-slate-500 mt-3">
               تجربة تعليمية بسيطة، منظمة، ومناسبة للطلاب.
