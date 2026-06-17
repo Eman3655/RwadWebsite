@@ -71,7 +71,7 @@ const cardSoftReveal: Variants = {
 
 export default function Home() {
   const { data: stats } = trpc.course.stats.useQuery();
-  const { data: coursesData } = trpc.course.list.useQuery({ limit: 6 });
+  const { data: coursesData } = trpc.course.list.useQuery({ limit: 3 });
   const courses = coursesData?.items ?? [];
 
   const statsCards = [
@@ -401,10 +401,22 @@ export default function Home() {
                 </Link>
               </motion.div>
             ))}
-          </motion.div>
+</motion.div>
 
-          {courses.length === 0 && (
-            <Card className="border-0 shadow-sm rounded-3xl">
+<div className="flex justify-center mt-8">
+  <Link to="/courses">
+    <Button
+      variant="outline"
+      className="rounded-2xl px-8"
+    >
+      عرض جميع البرامج
+      <ChevronLeft className="h-4 w-4 mr-2" />
+    </Button>
+  </Link>
+</div>
+
+{courses.length === 0 && (
+  <Card className="border-0 shadow-sm rounded-3xl">
               <CardContent className="p-12 text-center text-slate-400">
                 لا توجد برامج متاحة حالياً
               </CardContent>
