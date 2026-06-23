@@ -1,25 +1,32 @@
 import { z } from "zod";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm"; 
 
 import { createRouter, authedQuery, adminQuery } from "./middleware";
 import { getDb } from "./queries/connection";
 import { habits, users } from "@db/schema";
 
-function isToday(date?: Date | null) {
-  if (!date) return false;
-
-  const today = new Date();
-
-  return (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-  );
+function getTodayStr(): string {
+  return new Date().toISOString().slice(0, 10);
 }
 
 export const habitRouter = createRouter({
   list: authedQuery.query(async ({ ctx }) => {
     const db = getDb();
+    const todayStr = getTodayStr();
+
+    await db.execute(sql`
+      UPDATE ${habits}
+      SET current_streak = 0
+      WHERE user_id = ${ctx.user.id}
+        AND current_streak < goal_days
+        AND (
+          last_completed_at IS NULL
+          OR CAST(last_completed_at AS DATE) NOT IN (
+            CAST(${todayStr} AS DATE), 
+            CAST(${todayStr} AS DATE) - INTERVAL '1 day'
+          )
+        )
+    `);
 
     return db
       .select()
@@ -104,56 +111,54 @@ export const habitRouter = createRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const db = getDb();
+      const todayStr = getTodayStr();
 
-      const rows = await db
-        .select()
+      const habitExists = await db
+        .select({ currentStreak: habits.currentStreak, goalDays: habits.goalDays })
         .from(habits)
         .where(and(eq(habits.id, input.id), eq(habits.userId, ctx.user.id)))
         .limit(1);
 
-      const habit = rows[0];
-
-      if (!habit) {
+      if (habitExists.length === 0) {
         throw new Error("Habit not found");
       }
 
-      if (isToday(habit.lastCompletedAt)) {
+      const { currentStreak, goalDays } = habitExists[0];
+
+      if (currentStreak >= goalDays) {
+        return { success: false, message: "لقد وصلت إلى هدفك بالفعل!" };
+      }
+
+      const updatedRows = await db.execute(sql`
+        UPDATE ${habits}
+        SET
+          current_streak = CASE
+            WHEN CAST(last_completed_at AS DATE) = CAST(${todayStr} AS DATE) - INTERVAL '1 day'
+              THEN LEAST(current_streak + 1, goal_days)
+            ELSE 1
+          END,
+          last_completed_at = CAST(${todayStr} AS DATE)
+        WHERE id = ${input.id}
+          AND user_id = ${ctx.user.id}
+          AND (last_completed_at IS NULL OR CAST(last_completed_at AS DATE) <> CAST(${todayStr} AS DATE))
+        RETURNING current_streak, goal_days
+      `);
+
+      if (!updatedRows.rows.length) {
         return {
           success: false,
           message: "تم تسجيل هذه العادة اليوم بالفعل",
         };
       }
 
-      let newStreak = 1;
-
-      if (habit.lastCompletedAt) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        const last = new Date(habit.lastCompletedAt);
-
-        const wasYesterday =
-          last.getFullYear() === yesterday.getFullYear() &&
-          last.getMonth() === yesterday.getMonth() &&
-          last.getDate() === yesterday.getDate();
-
-        if (wasYesterday) {
-          newStreak = habit.currentStreak + 1;
-        }
-      }
-
-      await db
-        .update(habits)
-        .set({
-          currentStreak: newStreak,
-          lastCompletedAt: new Date(),
-        })
-        .where(eq(habits.id, habit.id));
+      const updated = updatedRows.rows[0] as { current_streak: number; goal_days: number };
+      const completedGoal = updated.current_streak >= updated.goal_days;
 
       return {
         success: true,
-        currentStreak: newStreak,
-        completedGoal: newStreak >= habit.goalDays,
+        currentStreak: updated.current_streak,
+        completedGoal: completedGoal,
+        message: completedGoal ? "🎉 لقد حققت هدفك!" : "تم تحديث السلسلة",
       };
     }),
 

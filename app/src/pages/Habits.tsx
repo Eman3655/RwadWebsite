@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { trpc } from "@/providers/trpc";
 import Navbar from "@/components/Navbar";
@@ -23,17 +23,18 @@ import {
   celebrateGoalAchieved,
 } from "@/utils/celebrations";
 
+// دالة محسنة لفحص إنجاز اليوم تعتمد على مقارنة النصوص (بدون مشاكل التوقيت)
 function isDoneToday(value?: string | Date | null) {
   if (!value) return false;
 
   const date = new Date(value);
   const today = new Date();
 
-  return (
-    date.getFullYear() === today.getFullYear() &&
-    date.getMonth() === today.getMonth() &&
-    date.getDate() === today.getDate()
-  );
+  const formatDateStr = (d: Date) => {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  };
+
+  return formatDateStr(date) === formatDateStr(today);
 }
 
 function progressColor(progress: number) {
@@ -57,6 +58,9 @@ export default function Habits() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [goalDays, setGoalDays] = useState(30);
+  
+  // حالة التصنيف الجديدة
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
 
   const createHabit = trpc.habit.create.useMutation({
     onSuccess: () => {
@@ -105,6 +109,25 @@ export default function Habits() {
   const completedGoals = habits.filter(
     (habit) => habit.currentStreak >= habit.goalDays,
   ).length;
+
+  // مصفوفة العادات المصنفة والمحسنة
+  const filteredHabits = useMemo(() => {
+    const isCompleted = (h: typeof habits[0]) => h.currentStreak >= h.goalDays;
+
+    if (filter === "active") {
+      return habits.filter((h) => !isCompleted(h));
+    }
+    
+    if (filter === "completed") {
+      return habits.filter((h) => isCompleted(h));
+    }
+
+    // في حال اختيار "الكل": نعرض النشطة أولاً ثم المكتملة
+    const activeHabits = habits.filter((h) => !isCompleted(h));
+    const completedHabits = habits.filter((h) => isCompleted(h));
+    
+    return [...activeHabits, ...completedHabits];
+  }, [habits, filter]);
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -238,138 +261,162 @@ export default function Habits() {
               </Button>
             </motion.div>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {habits.map((habit, index) => {
-                const progress = Math.min(
-                  Math.round((habit.currentStreak / habit.goalDays) * 100),
-                  100,
-                );
-
-                const completed = habit.currentStreak >= habit.goalDays;
-                const doneToday = isDoneToday(habit.lastCompletedAt);
-
-                return (
-                  <motion.div
-                    key={habit.id}
-                    variants={fadeUp}
-                    transition={{ delay: index * 0.035 }}
-                    className="bg-white rounded-3xl border shadow-sm p-4 hover:shadow-md transition-all"
+            <>
+              {/* أزرار التصنيف */}
+              <motion.div variants={fadeUp} className="flex gap-2 mb-6 flex-wrap">
+                {[
+                  { key: "all" as const, label: "الكل" },
+                  { key: "active" as const, label: "نشطة" },
+                  { key: "completed" as const, label: "مكتملة" },
+                ].map((btn) => (
+                  <button
+                    key={btn.key}
+                    onClick={() => setFilter(btn.key)}
+                    className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${
+                      filter === btn.key
+                        ? "bg-blue-700 text-white shadow-md"
+                        : "bg-white text-slate-600 border hover:bg-slate-50"
+                    }`}
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h2 className="text-lg font-bold text-slate-900 line-clamp-1">
-                          {habit.title}
-                        </h2>
+                    {btn.label}
+                  </button>
+                ))}
+              </motion.div>
 
-                        <div className="mt-2 flex items-center gap-2 flex-wrap">
-                          {habit.source === "admin" && (
-                            <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[11px] font-semibold">
-                              من الإدارة
-                            </span>
-                          )}
+              {/* قائمة العادات */}
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {filteredHabits.map((habit, index) => {
+                  const progress = Math.min(
+                    Math.round((habit.currentStreak / habit.goalDays) * 100),
+                    100,
+                  );
 
-                          {doneToday && !completed && (
-                            <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-semibold">
-                              منجز اليوم
-                            </span>
-                          )}
+                  const completed = habit.currentStreak >= habit.goalDays;
+                  const doneToday = isDoneToday(habit.lastCompletedAt);
 
-                          {completed && (
-                            <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold">
-                              مكتمل
-                            </span>
-                          )}
+                  return (
+                    <motion.div
+                      key={habit.id}
+                      variants={fadeUp}
+                      transition={{ delay: index * 0.035 }}
+                      className="bg-white rounded-3xl border shadow-sm p-4 hover:shadow-md transition-all"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <h2 className="text-lg font-bold text-slate-900 line-clamp-1">
+                            {habit.title}
+                          </h2>
+
+                          <div className="mt-2 flex items-center gap-2 flex-wrap">
+                            {habit.source === "admin" && (
+                              <span className="px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[11px] font-semibold">
+                                من الإدارة
+                              </span>
+                            )}
+
+                            {doneToday && !completed && (
+                              <span className="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[11px] font-semibold">
+                                منجز اليوم
+                              </span>
+                            )}
+
+                            {completed && (
+                              <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-semibold">
+                                مكتمل
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            if (confirm("هل تريد حذف هذه العادة؟")) {
+                              deleteHabit.mutate({ id: habit.id });
+                            }
+                          }}
+                          className="w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 flex items-center justify-center shrink-0"
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </button>
+                      </div>
+
+                      {habit.description && (
+                        <p className="text-xs text-slate-500 mt-3 leading-5 line-clamp-2 min-h-[40px]">
+                          {habit.description}
+                        </p>
+                      )}
+
+                      <div className="mt-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-semibold text-slate-500">
+                            التقدم
+                          </span>
+
+                          <span className="text-xs font-bold text-slate-900">
+                            {progress}%
+                          </span>
+                        </div>
+
+                        <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${progress}%` }}
+                            transition={{ duration: 0.6 }}
+                            className={`h-full rounded-full ${progressColor(progress)}`}
+                          />
                         </div>
                       </div>
 
-                      <button
+                      <div className="flex gap-2 mt-4">
+                        <div className="flex-1 rounded-xl bg-orange-50 p-2 text-center">
+                          <Flame className="h-4 w-4 text-orange-500 mx-auto mb-1" />
+                          <div className="text-base font-extrabold text-slate-900">
+                            {habit.currentStreak}
+                          </div>
+                          <div className="text-[11px] text-slate-500">
+                            متتالية
+                          </div>
+                        </div>
+
+                        <div className="flex-1 rounded-xl bg-blue-50 p-2 text-center">
+                          <Target className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+                          <div className="text-base font-extrabold text-slate-900">
+                            {habit.goalDays}
+                          </div>
+                          <div className="text-[11px] text-slate-500">الهدف</div>
+                        </div>
+                      </div>
+
+                      <Button
                         onClick={() => {
-                          if (confirm("هل تريد حذف هذه العادة؟")) {
-                            deleteHabit.mutate({ id: habit.id });
+                          if (!completed && !doneToday && !markDone.isPending) {
+                            markDone.mutate({ id: habit.id });
                           }
                         }}
-                        className="w-8 h-8 rounded-xl bg-red-50 hover:bg-red-100 flex items-center justify-center shrink-0"
+                        disabled={completed || doneToday || markDone.isPending}
+                        className={`mt-4 w-full h-10 rounded-2xl text-sm font-bold transition ${
+                          completed
+                            ? "bg-green-100 text-green-700 hover:bg-green-100 cursor-not-allowed"
+                            : doneToday
+                              ? "bg-slate-200 text-slate-500 hover:bg-slate-200 cursor-not-allowed"
+                              : markDone.isPending
+                                ? "bg-blue-300 text-white cursor-not-allowed"
+                                : "bg-blue-700 hover:bg-blue-800 text-white"
+                        }`}
                       >
-                        <Trash2 className="h-4 w-4 text-red-600" />
-                      </button>
-                    </div>
-
-                    {habit.description && (
-                      <p className="text-xs text-slate-500 mt-3 leading-5 line-clamp-2 min-h-[40px]">
-                        {habit.description}
-                      </p>
-                    )}
-
-<div className="mt-4">
-  <div className="flex items-center justify-between mb-2">
-    <span className="text-xs font-semibold text-slate-500">
-      التقدم
-    </span>
-
-    <span className="text-xs font-bold text-slate-900">
-      {progress}%
-    </span>
-  </div>
-
-  <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-    <motion.div
-      initial={{ width: 0 }}
-      animate={{ width: `${progress}%` }}
-      transition={{ duration: 0.6 }}
-      className={`h-full rounded-full ${progressColor(progress)}`}
-    />
-  </div>
-</div>
-
-                    <div className="flex gap-2 mt-4">
-                      <div className="flex-1 rounded-xl bg-orange-50 p-2 text-center">
-                        <Flame className="h-4 w-4 text-orange-500 mx-auto mb-1" />
-                        <div className="text-base font-extrabold text-slate-900">
-                          {habit.currentStreak}
-                        </div>
-                        <div className="text-[11px] text-slate-500">
-                          متتالية
-                        </div>
-                      </div>
-
-                      <div className="flex-1 rounded-xl bg-blue-50 p-2 text-center">
-                        <Target className="h-4 w-4 text-blue-600 mx-auto mb-1" />
-                        <div className="text-base font-extrabold text-slate-900">
-                          {habit.goalDays}
-                        </div>
-                        <div className="text-[11px] text-slate-500">الهدف</div>
-                      </div>
-                    </div>
-
-                    <Button
-                      onClick={() => {
-                        if (!completed && !doneToday && !markDone.isPending) {
-                          markDone.mutate({ id: habit.id });
-                        }
-                      }}
-                      disabled={completed || doneToday || markDone.isPending}
-                      className={`mt-4 w-full h-10 rounded-2xl text-sm font-bold transition ${
-                        completed
-                          ? "bg-green-100 text-green-700 hover:bg-green-100 cursor-not-allowed"
+                        {completed
+                          ? "تم تحقيق الهدف 🎉"
                           : doneToday
-                            ? "bg-slate-200 text-slate-500 hover:bg-slate-200 cursor-not-allowed"
+                            ? "تم تسجيل اليوم"
                             : markDone.isPending
-                              ? "bg-blue-300 text-white cursor-not-allowed"
-                              : "bg-blue-700 hover:bg-blue-800 text-white"
-                      }`}
-                    >
-                      {completed
-                        ? "تم تحقيق الهدف 🎉"
-                        : doneToday
-                          ? "تم تسجيل اليوم"
-                          : markDone.isPending
-                            ? "جاري التسجيل..."
-                            : "تسجيل إنجاز اليوم"}
-                    </Button>
-                  </motion.div>
-                );
-              })}
-            </div>
+                              ? "جاري التسجيل..."
+                              : "تسجيل إنجاز اليوم"}
+                      </Button>
+                    </motion.div>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       </motion.div>
