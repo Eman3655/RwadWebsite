@@ -85,7 +85,7 @@ export default function Courses() {
                 <div>
                   <div className="inline-flex items-center gap-2 bg-white/70 border border-white px-3 py-1 rounded-full text-sm text-blue-700 mb-4">
                     <Sparkles className="h-4 w-4" />
-                    برامج أكاديمية الرواد
+                    برامج مخيم الرواد
                   </div>
 
                   <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900">
