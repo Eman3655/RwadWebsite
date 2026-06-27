@@ -5,11 +5,9 @@ import { notifications, users } from "@db/schema";
 import { eq, desc, asc, and } from "drizzle-orm";
 import webpush from "web-push";
 
-const env = (import.meta as any).env;
-
-const vapidPublicKey = env?.VAPID_PUBLIC_KEY;
-const vapidPrivateKey = env?.VAPID_PRIVATE_KEY;
-const vapidEmail = env?.VAPID_EMAIL || "your-email@example.com";
+const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+const vapidEmail = process.env.VAPID_EMAIL || "your-email@example.com";
 
 if (vapidPublicKey && vapidPrivateKey) {
   webpush.setVapidDetails(
@@ -18,7 +16,7 @@ if (vapidPublicKey && vapidPrivateKey) {
     vapidPrivateKey 
   );
 } else {
-  console.warn("⚠️ تحذير: مفاتيح VAPID غير موجودة في ملف .env");
+  console.warn("⚠️ تحذير: مفاتيح VAPID غير موجودة في Environment Variables");
 }
 
 export const notificationRouter = createRouter({
