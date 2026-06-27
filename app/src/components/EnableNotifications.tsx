@@ -34,7 +34,7 @@ export default function EnableNotifications() {
         return;
       }
 
-      const registration = await navigator.serviceWorker.register("/sw.js");
+      const registration = await navigator.serviceWorker.register('/push-sw.js');
       const vapidKey = import.meta.env.VITE_PUBLIC_VAPID_KEY;
 
       const subscription = await registration.pushManager.subscribe({
