@@ -9,6 +9,7 @@ import {
   boolean,
   numeric,
   jsonb,
+  json
 } from "drizzle-orm/pg-core";
 
 export const userRoleEnum = pgEnum("role", ["admin", "teacher", "student"]);
@@ -58,6 +59,7 @@ export const users = pgTable("users", {
   isActive: boolean("is_active").default(true).notNull(),
   lastSignInAt: timestamp("last_sign_in_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  pushSubscription: json("push_subscription"), 
 });
 
 export type SelectUser = typeof users.$inferSelect;

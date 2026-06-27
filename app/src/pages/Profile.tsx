@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
 import {
   BookOpen,
   Award,
@@ -26,6 +27,7 @@ import {
   ShieldCheck,
   ArrowLeft,
 } from "lucide-react";
+import EnableNotifications from "@/components/EnableNotifications";
 
 export default function Profile() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -64,6 +66,8 @@ export default function Profile() {
     navigate("/login");
     return null;
   }
+
+  // ❌ تم حذف الكود من هنا لأن مكانه خطأ
 
   const handleAvatarUpload = async (file: File) => {
     const formData = new FormData();
@@ -252,6 +256,12 @@ export default function Profile() {
                         </Badge>
                       )}
                     </div>
+
+                    {!editing && (
+                      <div className="mt-4 flex justify-center lg:justify-start">
+                        <EnableNotifications />
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex justify-center lg:justify-end gap-2">

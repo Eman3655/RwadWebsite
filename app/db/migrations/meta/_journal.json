@@ -15,6 +15,13 @@
       "when": 1781453959543,
       "tag": "0001_lazy_the_stranger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782540353023,
+      "tag": "0002_deep_fenris",
+      "breakpoints": true
     }
   ]
 }

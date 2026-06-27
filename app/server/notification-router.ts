@@ -3,6 +3,23 @@ import { z } from "zod";
 import { getDb } from "./queries/connection";
 import { notifications, users } from "@db/schema";
 import { eq, desc, asc, and } from "drizzle-orm";
+import webpush from "web-push";
+
+const env = (import.meta as any).env;
+
+const vapidPublicKey = env?.VAPID_PUBLIC_KEY;
+const vapidPrivateKey = env?.VAPID_PRIVATE_KEY;
+const vapidEmail = env?.VAPID_EMAIL || "your-email@example.com";
+
+if (vapidPublicKey && vapidPrivateKey) {
+  webpush.setVapidDetails(
+    `mailto:${vapidEmail}`, 
+    vapidPublicKey,
+    vapidPrivateKey 
+  );
+} else {
+  console.warn("⚠️ تحذير: مفاتيح VAPID غير موجودة في ملف .env");
+}
 
 export const notificationRouter = createRouter({
   students: adminQuery.query(async () => {
@@ -75,6 +92,27 @@ export const notificationRouter = createRouter({
 
     return { success: true };
   }),
+  
+  savePushSubscription: authedQuery
+    .input(
+      z.object({
+        endpoint: z.string(),
+        keys: z.object({
+          p256dh: z.string(),
+          auth: z.string(),
+        }),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const db = getDb();
+
+      await db
+        .update(users)
+        .set({ pushSubscription: input })
+        .where(eq(users.id, ctx.user.id));
+
+      return { success: true };
+    }),
 
   send: adminQuery
     .input(
@@ -97,6 +135,35 @@ export const notificationRouter = createRouter({
           type: input.type,
         })
         .returning({ id: notifications.id });
+
+      const [user] = await db
+        .select({ pushSubscription: users.pushSubscription })
+        .from(users)
+        .where(eq(users.id, input.userId));
+
+      if (user?.pushSubscription) {
+        try {
+          const payload = JSON.stringify({
+            title: input.title,
+            message: input.message,
+            url: "/notifications", 
+          });
+
+          await webpush.sendNotification(
+            user.pushSubscription as any, 
+            payload
+          );
+        } catch (error) {
+          console.error("فشل إرسال الإشعار للجوال:", error);
+          
+          if (error instanceof Error && error.message.includes("410")) {
+            await db
+              .update(users)
+              .set({ pushSubscription: null })
+              .where(eq(users.id, input.userId));
+          }
+        }
+      }
 
       return { id: created.id };
     }),
