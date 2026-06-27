@@ -1,19 +1,19 @@
 {
   "name": "مخيم الرواد",
-  "short_name": "الرواد",
+  "short_name": "مخيم الرواد",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#1d4ed8",
+  "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "/uploads/logo.png",
+      "src": "/logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/uploads/logo.png",
+      "src": "/logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
