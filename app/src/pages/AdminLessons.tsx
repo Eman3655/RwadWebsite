@@ -30,7 +30,10 @@ import {
   HelpCircle,
   Loader2,
   Pencil,
+  Video,
 } from "lucide-react";
+
+type LessonType = "video" | "live" | "pdf" | "quiz" | "text";
 
 export default function AdminLessons() {
   const { user } = useAuth();
@@ -44,7 +47,7 @@ export default function AdminLessons() {
   const emptyForm = {
     title: "",
     description: "",
-    type: "video" as "video" | "pdf" | "quiz" | "text",
+    type: "video" as LessonType,
     content: "",
     fileUrl: "",
     orderIndex: 0,
@@ -114,7 +117,7 @@ export default function AdminLessons() {
     setForm({
       title: lesson.title || "",
       description: lesson.description || "",
-      type: lesson.type || "video",
+      type: (lesson.type || "video") as LessonType,
       content: lesson.content || "",
       fileUrl: lesson.fileUrl || "",
       orderIndex: lesson.orderIndex || 0,
@@ -126,7 +129,8 @@ export default function AdminLessons() {
   };
 
   const typeLabels: Record<string, string> = {
-    video: "فيديو",
+    video: "فيديو مسجل",
+    live: "جلسة مباشرة",
     pdf: "PDF",
     quiz: "اختبار",
     text: "نص",
@@ -134,10 +138,20 @@ export default function AdminLessons() {
 
   const typeIcons: Record<string, typeof Play> = {
     video: Play,
+    live: Video,
     pdf: FileText,
     quiz: HelpCircle,
     text: FileText,
   };
+
+  const contentLabel =
+    form.type === "video"
+      ? "رابط الفيديو"
+      : form.type === "live"
+        ? "رابط Google Meet"
+        : form.type === "pdf"
+          ? "رابط ملف PDF"
+          : "المحتوى";
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -195,7 +209,7 @@ export default function AdminLessons() {
                       <Label>نوع الدرس</Label>
                       <Select
                         value={form.type}
-                        onValueChange={(v: "video" | "pdf" | "quiz" | "text") =>
+                        onValueChange={(v: LessonType) =>
                           setForm({ ...form, type: v })
                         }
                       >
@@ -203,7 +217,8 @@ export default function AdminLessons() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="video">فيديو</SelectItem>
+                          <SelectItem value="video">فيديو مسجل</SelectItem>
+                          <SelectItem value="live">جلسة مباشرة</SelectItem>
                           <SelectItem value="pdf">PDF</SelectItem>
                           <SelectItem value="text">نص</SelectItem>
                           <SelectItem value="quiz">اختبار</SelectItem>
@@ -224,13 +239,7 @@ export default function AdminLessons() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>
-                      {form.type === "video"
-                        ? "رابط الفيديو"
-                        : form.type === "pdf"
-                          ? "رابط ملف PDF"
-                          : "المحتوى"}
-                    </Label>
+                    <Label>{contentLabel}</Label>
                     <Input
                       value={form.type === "pdf" ? form.fileUrl : form.content}
                       onChange={(e) =>
@@ -238,8 +247,32 @@ export default function AdminLessons() {
                           ? setForm({ ...form, fileUrl: e.target.value })
                           : setForm({ ...form, content: e.target.value })
                       }
+                      placeholder={
+                        form.type === "live"
+                          ? "مثال: https://meet.google.com/abc-defg-hij"
+                          : undefined
+                      }
                     />
                   </div>
+
+                  {form.type === "live" && (
+                    <div className="space-y-2">
+                      <Label>رابط التسجيل بعد انتهاء الجلسة - اختياري</Label>
+                      <Input
+                        value={form.fileUrl}
+                        onChange={(e) =>
+                          setForm({ ...form, fileUrl: e.target.value })
+                        }
+                        placeholder="رابط تسجيل YouTube أو Google Drive"
+                      />
+
+                      <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-700 leading-7">
+                        أثناء الدرس سيظهر زر دخول إلى Google Meet. بعد انتهاء
+                        الدرس يمكنك وضع رابط التسجيل هنا ليظهر للطالبات في نفس
+                        صفحة الدرس.
+                      </div>
+                    </div>
+                  )}
 
                   <div className="space-y-2">
                     <Label>المدة - دقائق</Label>
@@ -264,7 +297,7 @@ export default function AdminLessons() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="paid">مدفوع / للطلاب المسجلين</SelectItem>
+                        <SelectItem value="paid">مدفوع / للطالبات المسجلات</SelectItem>
                         <SelectItem value="free">مجاني</SelectItem>
                       </SelectContent>
                     </Select>
@@ -374,7 +407,7 @@ export default function AdminLessons() {
 
                           <td className="py-3 px-4">
                             <Badge className="bg-slate-100 text-slate-600">
-                              {typeLabels[lesson.type]}
+                              {typeLabels[lesson.type] ?? lesson.type}
                             </Badge>
                           </td>
 
@@ -390,7 +423,7 @@ export default function AdminLessons() {
                                   : "bg-blue-100 text-blue-700"
                               }
                             >
-                              {lesson.isFree ? "مجاني" : "مسجلين"}
+                              {lesson.isFree ? "مجاني" : "مسجلات"}
                             </Badge>
                           </td>
 

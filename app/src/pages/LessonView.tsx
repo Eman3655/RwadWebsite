@@ -16,20 +16,32 @@ import {
   Loader2,
   AlertCircle,
   BookOpen,
+  Video,
+  ExternalLink,
 } from "lucide-react";
 
 function getYouTubeEmbedUrl(url: string) {
   try {
     const parsed = new URL(url);
 
-    if (parsed.hostname.includes("youtube.com")) {
-      const videoId = parsed.searchParams.get("v");
+    if (parsed.hostname.includes("youtu.be")) {
+      const videoId = parsed.pathname.slice(1);
       return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
     }
 
-    if (parsed.hostname.includes("youtu.be")) {
-      const videoId = parsed.pathname.replace("/", "");
-      return videoId ? `https://www.youtube.com/embed/${videoId}` : null;
+    const watchId = parsed.searchParams.get("v");
+    if (watchId) {
+      return `https://www.youtube.com/embed/${watchId}`;
+    }
+
+    const liveMatch = parsed.pathname.match(/^\/live\/([^/?]+)/);
+    if (liveMatch) {
+      return `https://www.youtube.com/embed/${liveMatch[1]}`;
+    }
+
+    const embedMatch = parsed.pathname.match(/^\/embed\/([^/?]+)/);
+    if (embedMatch) {
+      return `https://www.youtube.com/embed/${embedMatch[1]}`;
     }
 
     return null;
@@ -84,8 +96,20 @@ function getGoogleDrivePdfEmbed(url: string) {
   }
 }
 
+function isValidUrl(url?: string | null) {
+  if (!url) return false;
+
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const lessonTypeLabels: Record<string, string> = {
-  video: "فيديو",
+  video: "فيديو مسجل",
+  live: "جلسة مباشرة",
   pdf: "ملف PDF",
   text: "نص",
   quiz: "اختبار",
@@ -182,6 +206,16 @@ export default function LessonView() {
       ? getVideoEmbedUrl(lesson.content)
       : null;
 
+  const replayEmbedUrl =
+    lesson.type === "live" && lesson.fileUrl
+      ? getVideoEmbedUrl(lesson.fileUrl)
+      : null;
+
+  const meetUrl =
+    lesson.type === "live" && isValidUrl(lesson.content)
+      ? lesson.content
+      : null;
+
   const handleToggleComplete = () => {
     if (!isAuthenticated) {
       navigate("/login");
@@ -242,6 +276,86 @@ export default function LessonView() {
                     </div>
                   )}
                 </div>
+              )}
+
+              {lesson.type === "live" && (
+                <Card className="border-0 shadow-lg mb-6 rounded-[2rem] overflow-hidden">
+                  <CardContent className="p-0">
+                    <div className="bg-gradient-to-br from-blue-700 to-indigo-800 text-white p-8 text-center">
+                      <div className="w-16 h-16 mx-auto mb-4 rounded-3xl bg-white/15 flex items-center justify-center">
+                        <Video className="h-8 w-8" />
+                      </div>
+
+                      <Badge className="mb-4 rounded-full bg-red-500 text-white hover:bg-red-500">
+                        جلسة مباشرة تفاعلية
+                      </Badge>
+
+                      <h2 className="text-2xl md:text-3xl font-extrabold mb-3">
+                        {lesson.title}
+                      </h2>
+
+                      <p className="text-blue-100 leading-7 max-w-2xl mx-auto mb-6">
+                        اضغطي على الزر للانضمام إلى المحاضرة التفاعلية عبر
+                        Google Meet. بعد انتهاء الجلسة يمكن مشاهدة التسجيل هنا
+                        إذا تم توفيره.
+                      </p>
+
+                      {meetUrl ? (
+                        <a href={meetUrl} target="_blank" rel="noreferrer">
+                          <Button className="h-12 rounded-2xl bg-white text-blue-800 hover:bg-blue-50 font-bold px-8">
+                            <Video className="h-5 w-5 ml-2" />
+                            الانضمام إلى المحاضرة
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                          </Button>
+                        </a>
+                      ) : (
+                        <div className="rounded-2xl bg-white/10 p-4 text-sm text-blue-50">
+                          لم يتم إضافة رابط Google Meet بعد.
+                        </div>
+                      )}
+                    </div>
+
+                    {lesson.fileUrl && (
+                      <div className="p-6 bg-white">
+                        <div className="flex items-center gap-2 mb-4">
+                          <Play className="h-5 w-5 text-blue-700" />
+                          <h3 className="font-extrabold text-slate-900">
+                            تسجيل الجلسة
+                          </h3>
+                        </div>
+
+                        {replayEmbedUrl ? (
+                          <div className="bg-black rounded-[1.5rem] overflow-hidden aspect-video">
+                            <iframe
+                              src={replayEmbedUrl}
+                              className="w-full h-full"
+                              title={`تسجيل ${lesson.title}`}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                            />
+                          </div>
+                        ) : isDirectVideoUrl(lesson.fileUrl) ? (
+                          <video
+                            src={lesson.fileUrl}
+                            controls
+                            className="w-full rounded-[1.5rem]"
+                          />
+                        ) : (
+                          <a
+                            href={lesson.fileUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <Button className="rounded-2xl bg-blue-700 hover:bg-blue-800">
+                              <Play className="h-4 w-4 ml-2" />
+                              فتح التسجيل
+                            </Button>
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               )}
 
               {lesson.type === "pdf" && lesson.fileUrl && (

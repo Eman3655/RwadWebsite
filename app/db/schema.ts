@@ -22,6 +22,7 @@ export const courseLevelEnum = pgEnum("level", [
 
 export const lessonTypeEnum = pgEnum("lesson_type", [
   "video",
+  "live",
   "pdf",
   "quiz",
   "text",

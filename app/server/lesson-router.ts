@@ -4,6 +4,8 @@ import { getDb } from "../server/queries/connection";
 import { lessons, lessonProgress, enrollments, courses } from "@db/schema";
 import { eq, and, asc } from "drizzle-orm";
 
+const lessonTypeSchema = z.enum(["video", "live", "pdf", "quiz", "text"]);
+
 async function recalculateCourseProgress(enrollmentId: number, courseId: number) {
   const db = getDb();
 
@@ -87,7 +89,7 @@ export const lessonRouter = createRouter({
         courseId: z.number(),
         title: z.string().min(2),
         description: z.string().optional(),
-        type: z.enum(["video", "pdf", "quiz", "text"]).default("video"),
+        type: lessonTypeSchema.default("video"),
         content: z.string().optional(),
         fileUrl: z.string().optional(),
         orderIndex: z.number().default(0),
@@ -124,7 +126,7 @@ export const lessonRouter = createRouter({
         id: z.number(),
         title: z.string().min(2).optional(),
         description: z.string().optional(),
-        type: z.enum(["video", "pdf", "quiz", "text"]).optional(),
+        type: lessonTypeSchema.optional(),
         content: z.string().optional(),
         fileUrl: z.string().optional(),
         orderIndex: z.number().optional(),
