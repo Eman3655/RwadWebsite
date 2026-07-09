@@ -85,16 +85,17 @@ export default function Courses() {
                 <div>
                   <div className="inline-flex items-center gap-2 bg-white/70 border border-white px-3 py-1 rounded-full text-sm text-blue-700 mb-4">
                     <Sparkles className="h-4 w-4" />
-                    برامج مخيم الرواد
+                    مسارات تربوية لبناء الجيل الصاعد
                   </div>
 
                   <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900">
-                    البرامج التعليمية
+                    برامج مخيم الرواد
                   </h1>
 
                   <p className="text-slate-600 mt-3 max-w-xl leading-7">
-                    اختر البرنامج المناسب، وابدأ رحلة تعليمية واضحة ومنظمة حسب
-                    مستواك وهدفك.
+                    برامج متدرجة تعين الطالب على معرفة ربه، وتعظيم وحيه،
+                    وفهم طريق العبودية والإصلاح، من خلال العلم والعمل
+                    والمتابعة.
                   </p>
                 </div>
 
@@ -122,7 +123,7 @@ export default function Courses() {
                   <Search className="absolute right-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
 
                   <Input
-                    placeholder="ابحث عن برنامج..."
+                    placeholder="ابحث عن برنامج تربوي..."
                     value={search}
                     onChange={(e) => {
                       setSearch(e.target.value);
@@ -186,11 +187,11 @@ export default function Courses() {
                 <BookOpen className="h-16 w-16 text-slate-300 mx-auto mb-4" />
 
                 <h3 className="text-2xl font-bold text-slate-700 mb-2">
-                  لا توجد برامج
+                  لا توجد برامج متاحة
                 </h3>
 
                 <p className="text-slate-400">
-                  جرب تغيير كلمة البحث أو فلترة المستوى.
+                  جرّب تغيير كلمة البحث أو اختيار مستوى آخر.
                 </p>
               </motion.div>
             ) : (
@@ -218,7 +219,7 @@ export default function Courses() {
                               <div className="h-full flex flex-col items-center justify-center text-white">
                                 <BookOpen className="h-14 w-14 mb-2 opacity-90" />
                                 <span className="font-semibold">
-                                  {course.categoryName || "قسم عام"}
+                                  {course.categoryName || "مسار تربوي"}
                                 </span>
                               </div>
                             )}
@@ -239,13 +240,13 @@ export default function Courses() {
 
                             <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-6">
                               {course.description ||
-                                "وصف البرنامج غير متوفر حالياً."}
+                                "برنامج تربوي يعين الطالب على بناء إيمانه، وضبط موازينه، وربط العلم بالعمل."}
                             </p>
 
                             <div className="flex items-center justify-between mt-5 text-sm text-slate-500">
                               <div className="flex items-center gap-1">
                                 <Layers className="h-4 w-4" />
-                                <span>{course.categoryName || "قسم عام"}</span>
+                                <span>{course.categoryName || "مسار تربوي"}</span>
                               </div>
 
                               <div className="flex items-center gap-1">
@@ -263,7 +264,7 @@ export default function Courses() {
                               </div>
 
                               <div className="flex items-center gap-1 text-blue-700 font-bold text-sm">
-                                عرض التفاصيل
+                                عرض البرنامج
                                 <ChevronLeft className="h-4 w-4" />
                               </div>
                             </div>

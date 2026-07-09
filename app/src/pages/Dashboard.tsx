@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   BookOpen,
   Users,
-  GraduationCap,
   FileText,
   HelpCircle,
   ChevronLeft,
@@ -20,6 +19,9 @@ import {
   Activity,
   CheckCircle,
   Paperclip,
+  UserCheck,
+  UserX,
+  GraduationCap,
 } from "lucide-react";
 
 import {
@@ -32,19 +34,17 @@ import {
   CartesianGrid,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   RadialBarChart,
   RadialBar,
+  Cell,
 } from "recharts";
 
 const palette = [
   { bg: "#E5F0FF", border: "#B3D4FF", text: "#1E40AF" },
-  { bg: "#FFE5EC", border: "#FFADC2", text: "#BE185D" },
   { bg: "#EAF7EE", border: "#B3E5C1", text: "#166534" },
   { bg: "#FFF4E5", border: "#FFD6B3", text: "#C2410C" },
   { bg: "#F3E8FF", border: "#D8B4FE", text: "#7C3AED" },
+  { bg: "#FFE5EC", border: "#FFADC2", text: "#BE185D" },
   { bg: "#E6FFFA", border: "#99F6E4", text: "#0F766E" },
 ];
 
@@ -71,8 +71,13 @@ export default function Dashboard() {
     enabled: isAdmin,
   });
 
-  const { data: recentEnrollments } =
+  const { data: allEnrollments } =
     trpc.dashboard.recentEnrollments.useQuery(undefined, {
+      enabled: isAdmin,
+    });
+
+  const { data: latestEnrollments } =
+    trpc.dashboard.latestEnrollments.useQuery(undefined, {
       enabled: isAdmin,
     });
 
@@ -93,34 +98,63 @@ export default function Dashboard() {
     return null;
   }
 
-  const enrollments = recentEnrollments ?? [];
+  const enrollments = allEnrollments ?? [];
+  const latestRows = latestEnrollments ?? [];
   const studentsList = students ?? [];
 
   const activeStudents = studentsList.filter((s) => s.isActive).length;
   const inactiveStudents = studentsList.length - activeStudents;
 
-  const averageProgress =
-    enrollments.length > 0
-      ? Math.round(
-          enrollments.reduce((sum, item) => sum + Number(item.progress ?? 0), 0) /
-            enrollments.length,
-        )
-      : 0;
-
   const completedEnrollments = enrollments.filter(
-    (e) => e.status === "completed",
+    (e) => e.status === "completed"
   ).length;
 
-  const activeEnrollments = enrollments.filter((e) => e.status === "active")
-    .length;
+  const activeEnrollments = enrollments.filter(
+    (e) => e.status === "active"
+  ).length;
 
   const stoppedEnrollments =
     enrollments.length - completedEnrollments - activeEnrollments;
 
-  const studentStatusData = [
-    { name: "نشط", value: activeStudents },
-    { name: "موقوف", value: inactiveStudents },
-  ];
+  const averageProgress =
+    enrollments.length > 0
+      ? Math.round(
+          enrollments.reduce(
+            (sum, item) => sum + Number(item.progress ?? 0),
+            0
+          ) / enrollments.length
+        )
+      : 0;
+
+  const completionRate =
+    enrollments.length > 0
+      ? Math.round((completedEnrollments / enrollments.length) * 100)
+      : 0;
+
+  const activeEnrollmentRate =
+    enrollments.length > 0
+      ? Math.round((activeEnrollments / enrollments.length) * 100)
+      : 0;
+
+  const dailyEnrollmentsMap: Record<string, number> = {};
+
+  enrollments.forEach((item: any) => {
+    const key = item.enrolledAt
+      ? new Date(item.enrolledAt).toLocaleDateString("ar-EG", {
+          day: "2-digit",
+          month: "2-digit",
+        })
+      : "غير محدد";
+
+    dailyEnrollmentsMap[key] = (dailyEnrollmentsMap[key] ?? 0) + 1;
+  });
+
+  const dailyEnrollmentsData = Object.entries(dailyEnrollmentsMap)
+    .slice(0, 7)
+    .map(([date, count]) => ({
+      date,
+      count,
+    }));
 
   const enrollmentStatusData = [
     { name: "نشط", value: activeEnrollments },
@@ -132,51 +166,36 @@ export default function Dashboard() {
     (bucket) => ({
       name: bucket,
       value: enrollments.filter(
-        (item) => getProgressBucket(Number(item.progress ?? 0)) === bucket,
+        (item) => getProgressBucket(Number(item.progress ?? 0)) === bucket
       ).length,
-    }),
+    })
   );
-
-const dailyEnrollmentsMap: Record<string, number> = {};
-
-enrollments.forEach((item: any) => {
-  const key = item.enrolledAt
-    ? new Date(item.enrolledAt).toLocaleDateString("ar-EG", {
-        day: "2-digit",
-        month: "2-digit",
-      })
-    : "غير محدد";
-
-  dailyEnrollmentsMap[key] = (dailyEnrollmentsMap[key] ?? 0) + 1;
-});
-
-  const dailyEnrollmentsData = Object.entries(dailyEnrollmentsMap)
-    .slice(0, 7)
-    .map(([date, count]) => ({
-      date,
-      count,
-    }));
 
   const topStudentsByProgress = [...enrollments]
     .sort((a, b) => Number(b.progress ?? 0) - Number(a.progress ?? 0))
     .slice(0, 5)
     .map((item) => ({
       name: item.studentName,
+      course: item.courseTitle,
       progress: Number(item.progress ?? 0),
+      status: item.status,
     }));
 
-  const radialProgressData = [
-    {
-      name: "متوسط التقدم",
-      value: averageProgress,
-      fill: palette[0].text,
-    },
-  ];
+  const recentEnrollmentRows = latestRows.map((item) => ({
+    student: item.studentName,
+    course: item.courseTitle,
+    progress: Number(item.progress ?? 0),
+    status: item.status,
+    date: item.enrolledAt
+      ? new Date(item.enrolledAt).toLocaleDateString("ar-EG")
+      : "غير محدد",
+  }));
 
   const statCards = [
     {
-      title: "البرامج التعليمية",
+      title: "البرامج التربوية",
       value: stats?.courses ?? 0,
+      description: "عدد البرامج المنشأة داخل المنصة",
       icon: BookOpen,
       link: "/dashboard/courses",
       color: palette[0],
@@ -184,20 +203,23 @@ enrollments.forEach((item: any) => {
     {
       title: "الطلاب",
       value: stats?.students ?? 0,
+      description: "إجمالي حسابات الطلاب",
       icon: Users,
       link: "/dashboard/students",
-      color: palette[2],
+      color: palette[1],
     },
     {
       title: "التسجيلات",
       value: stats?.enrollments ?? 0,
+      description: "عدد التحاقات الطلاب بالبرامج",
       icon: TrendingUp,
       link: "/dashboard/courses",
-      color: palette[3],
+      color: palette[2],
     },
     {
       title: "الدروس",
       value: stats?.lessons ?? 0,
+      description: "إجمالي الدروس المنشورة",
       icon: FileText,
       link: "/dashboard/lessons",
       color: palette[5],
@@ -205,9 +227,10 @@ enrollments.forEach((item: any) => {
     {
       title: "محاولات الاختبارات",
       value: stats?.quizAttempts ?? 0,
+      description: "عدد محاولات الطلاب في الاختبارات",
       icon: HelpCircle,
       link: "/dashboard/quizzes",
-      color: palette[1],
+      color: palette[4],
     },
   ];
 
@@ -232,12 +255,19 @@ enrollments.forEach((item: any) => {
                 <ChevronLeft className="h-5 w-5" />
               </Link>
 
-              <h1 className="text-xl font-bold text-slate-900">لوحة التحكم</h1>
+              <div>
+                <h1 className="text-xl font-bold text-slate-900">
+                  لوحة إحصائيات مخيم الرواد
+                </h1>
+                <p className="text-xs text-slate-400 hidden sm:block">
+                  متابعة البرامج، الطلاب، التقدم، والاختبارات
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
               <span className="hidden sm:block text-sm text-slate-500">
-                مرحباً، {user?.name}
+                مرحبًا، {user?.name}
               </span>
 
               <Link to="/profile">
@@ -270,27 +300,39 @@ enrollments.forEach((item: any) => {
           <div className="absolute -top-20 -left-16 w-64 h-64 bg-white/40 rounded-full blur-3xl" />
           <div className="absolute -bottom-24 -right-16 w-72 h-72 bg-white/40 rounded-full blur-3xl" />
 
-          <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div>
               <div className="inline-flex items-center gap-2 bg-white/70 border border-white px-3 py-1 rounded-full text-sm text-blue-700 mb-4">
                 <BarChart3 className="h-4 w-4" />
-                تحليلات المعلم
+                إحصائيات الموقع
               </div>
 
               <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900">
-                نظرة شاملة على أداء الطلاب
+                صورة عامة عن سير البرامج والطلاب
               </h2>
 
               <p className="text-slate-600 mt-3 max-w-2xl leading-7">
-                تابع التسجيلات، حالة الطلاب، متوسط التقدم، ونسب الإنجاز من خلال
-                رسوم بيانية هادئة وواضحة.
+                تعرض هذه الصفحة مؤشرات الموقع الأساسية: عدد البرامج، الطلاب،
+                التسجيلات، الدروس، الاختبارات، ونسب التقدم والإنجاز؛ لمساعدة
+                المشرف على متابعة الأثر التعليمي والتربوي بصورة واضحة.
               </p>
             </div>
 
-            <div className="bg-white/75 backdrop-blur rounded-3xl border border-white p-5 min-w-[220px]">
-              <div className="text-sm text-slate-500 mb-1">متوسط تقدم الطلاب</div>
-              <div className="text-4xl font-extrabold text-blue-700">
-                {averageProgress}%
+            <div className="grid grid-cols-2 gap-3 min-w-[290px]">
+              <div className="bg-white/80 backdrop-blur rounded-3xl border border-white p-4 text-center">
+                <div className="text-sm text-slate-500 mb-1">
+                  متوسط التقدم
+                </div>
+                <div className="text-4xl font-extrabold text-blue-700">
+                  {averageProgress}%
+                </div>
+              </div>
+
+              <div className="bg-white/80 backdrop-blur rounded-3xl border border-white p-4 text-center">
+                <div className="text-sm text-slate-500 mb-1">نسبة الإتمام</div>
+                <div className="text-4xl font-extrabold text-green-700">
+                  {completionRate}%
+                </div>
               </div>
             </div>
           </div>
@@ -314,36 +356,50 @@ enrollments.forEach((item: any) => {
           })}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           {statCards.map((stat) => {
             const Icon = stat.icon;
 
             return (
               <Link key={stat.title} to={stat.link}>
                 <Card
-                  className="rounded-3xl shadow-sm border hover:-translate-y-1 hover:shadow-md transition"
+                  className="rounded-3xl shadow-sm border hover:-translate-y-1 hover:shadow-md transition h-full"
                   style={{
                     backgroundColor: stat.color.bg,
                     borderColor: stat.color.border,
                   }}
                 >
-                  <CardContent className="p-4">
-                    <div
-                      className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center mb-3"
-                      style={{ color: stat.color.text }}
-                    >
-                      <Icon className="h-6 w-6" />
+                  <CardContent className="p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div
+                        className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center"
+                        style={{ color: stat.color.text }}
+                      >
+                        <Icon className="h-6 w-6" />
+                      </div>
+
+                      <ChevronLeft
+                        className="h-5 w-5 opacity-60"
+                        style={{ color: stat.color.text }}
+                      />
                     </div>
 
                     <div
-                      className="text-2xl font-extrabold"
+                      className="text-3xl font-extrabold mt-4"
                       style={{ color: stat.color.text }}
                     >
                       {stat.value}
                     </div>
 
-                    <div className="text-sm mt-1" style={{ color: stat.color.text }}>
+                    <div
+                      className="text-base font-bold mt-1"
+                      style={{ color: stat.color.text }}
+                    >
                       {stat.title}
+                    </div>
+
+                    <div className="text-xs mt-2 text-slate-600 leading-5">
+                      {stat.description}
                     </div>
                   </CardContent>
                 </Card>
@@ -352,29 +408,97 @@ enrollments.forEach((item: any) => {
           })}
         </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="border-0 shadow-sm rounded-[2rem]">
+            <CardContent className="p-6">
+              <UserCheck className="h-7 w-7 text-green-700 mb-3" />
+              <h3 className="font-extrabold text-slate-900">
+                الطلاب النشطون
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                حسابات مفعلة داخل المنصة
+              </p>
+              <div className="text-4xl font-extrabold text-green-700 mt-4">
+                {activeStudents}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm rounded-[2rem]">
+            <CardContent className="p-6">
+              <UserX className="h-7 w-7 text-pink-700 mb-3" />
+              <h3 className="font-extrabold text-slate-900">
+                الطلاب الموقوفون
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                حسابات غير نشطة حاليًا
+              </p>
+              <div className="text-4xl font-extrabold text-pink-700 mt-4">
+                {inactiveStudents}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm rounded-[2rem]">
+            <CardContent className="p-6">
+              <Activity className="h-7 w-7 text-blue-700 mb-3" />
+              <h3 className="font-extrabold text-slate-900">
+                التسجيلات النشطة
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">
+                طلاب ما زالوا داخل البرامج
+              </p>
+              <div className="text-4xl font-extrabold text-blue-700 mt-4">
+                {activeEnrollmentRate}%
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm rounded-[2rem]">
+            <CardContent className="p-6">
+              <GraduationCap className="h-7 w-7 text-purple-700 mb-3" />
+              <h3 className="font-extrabold text-slate-900">
+                التسجيلات المكتملة
+              </h3>
+              <p className="text-sm text-slate-500 mt-1">برامج أتمها الطلاب</p>
+              <div className="text-4xl font-extrabold text-purple-700 mt-4">
+                {completedEnrollments}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <Card className="border-0 shadow-sm rounded-[2rem] lg:col-span-2">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between mb-5">
-                <div>
-                  <h3 className="text-xl font-extrabold text-slate-900">
-                    نشاط التسجيلات
-                  </h3>
-                  <p className="text-sm text-slate-500 mt-1">
-                    عدد التسجيلات حسب الأيام الأخيرة.
-                  </p>
-                </div>
-
-                <Activity className="h-6 w-6 text-blue-700" />
-              </div>
+              <h3 className="text-xl font-extrabold text-slate-900">
+                نشاط التسجيلات
+              </h3>
+              <p className="text-sm text-slate-500 mt-1 mb-5">
+                عدد التحاقات الطلاب بالبرامج خلال الأيام الأخيرة.
+              </p>
 
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={dailyEnrollmentsData}>
                     <defs>
-                      <linearGradient id="enrollmentsGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#B3D4FF" stopOpacity={0.9} />
-                        <stop offset="100%" stopColor="#E5F0FF" stopOpacity={0.15} />
+                      <linearGradient
+                        id="enrollmentsGradient"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor="#B3D4FF"
+                          stopOpacity={0.9}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor="#E5F0FF"
+                          stopOpacity={0.15}
+                        />
                       </linearGradient>
                     </defs>
 
@@ -398,11 +522,11 @@ enrollments.forEach((item: any) => {
           <Card className="border-0 shadow-sm rounded-[2rem]">
             <CardContent className="p-6">
               <h3 className="text-xl font-extrabold text-slate-900 mb-1">
-                متوسط التقدم
+                متوسط تقدم الطلاب
               </h3>
 
               <p className="text-sm text-slate-500 mb-5">
-                متوسط تقدم الطلاب في التسجيلات الحالية.
+                متوسط التقدم في جميع التسجيلات.
               </p>
 
               <div className="h-72 relative">
@@ -410,7 +534,13 @@ enrollments.forEach((item: any) => {
                   <RadialBarChart
                     innerRadius="72%"
                     outerRadius="100%"
-                    data={radialProgressData}
+                    data={[
+                      {
+                        name: "متوسط التقدم",
+                        value: averageProgress,
+                        fill: palette[0].text,
+                      },
+                    ]}
                     startAngle={90}
                     endAngle={-270}
                   >
@@ -433,62 +563,11 @@ enrollments.forEach((item: any) => {
           <Card className="border-0 shadow-sm rounded-[2rem]">
             <CardContent className="p-6">
               <h3 className="text-xl font-extrabold text-slate-900 mb-1">
-                حالة الطلاب
-              </h3>
-
-              <p className="text-sm text-slate-500 mb-5">
-                مقارنة بين الطلاب النشطين والموقوفين.
-              </p>
-
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={studentStatusData}
-                      dataKey="value"
-                      nameKey="name"
-                      innerRadius={65}
-                      outerRadius={95}
-                      paddingAngle={4}
-                    >
-                      {studentStatusData.map((_, index) => (
-                        <Cell
-                          key={index}
-                          fill={index === 0 ? palette[2].text : palette[1].text}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-2xl bg-green-50 border border-green-100 p-3 text-center">
-                  <div className="text-2xl font-extrabold text-green-700">
-                    {activeStudents}
-                  </div>
-                  <div className="text-sm text-green-700">نشط</div>
-                </div>
-
-                <div className="rounded-2xl bg-pink-50 border border-pink-100 p-3 text-center">
-                  <div className="text-2xl font-extrabold text-pink-700">
-                    {inactiveStudents}
-                  </div>
-                  <div className="text-sm text-pink-700">موقوف</div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-0 shadow-sm rounded-[2rem]">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-extrabold text-slate-900 mb-1">
                 حالة التسجيلات
               </h3>
 
               <p className="text-sm text-slate-500 mb-5">
-                هل الطلاب يدرسون أم أتموا البرامج أم توقفوا؟
+                توزيع الطلاب بين البرامج النشطة والمكتملة والمتوقفة.
               </p>
 
               <div className="h-72">
@@ -508,9 +587,7 @@ enrollments.forEach((item: any) => {
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="border-0 shadow-sm rounded-[2rem]">
             <CardContent className="p-6">
               <h3 className="text-xl font-extrabold text-slate-900 mb-1">
@@ -518,7 +595,7 @@ enrollments.forEach((item: any) => {
               </h3>
 
               <p className="text-sm text-slate-500 mb-5">
-                كم طالبًا يقع في كل مستوى من مستويات الإنجاز؟
+                عدد التسجيلات داخل كل مستوى من مستويات الإنجاز.
               </p>
 
               <div className="h-72">
@@ -541,15 +618,17 @@ enrollments.forEach((item: any) => {
               </div>
             </CardContent>
           </Card>
+        </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card className="border-0 shadow-sm rounded-[2rem]">
             <CardContent className="p-6">
               <h3 className="text-xl font-extrabold text-slate-900 mb-1">
-                أفضل الطلاب تقدمًا
+                أعلى الطلاب تقدمًا
               </h3>
 
               <p className="text-sm text-slate-500 mb-5">
-                أعلى الطلاب من حيث نسبة التقدم.
+                أكثر الطلاب تقدمًا في البرامج المسجلة.
               </p>
 
               {topStudentsByProgress.length > 0 ? (
@@ -564,8 +643,13 @@ enrollments.forEach((item: any) => {
                       }}
                     >
                       <div className="flex items-center justify-between mb-2">
-                        <div className="font-bold text-slate-900">
-                          {student.name}
+                        <div>
+                          <div className="font-bold text-slate-900">
+                            {student.name}
+                          </div>
+                          <div className="text-xs text-slate-500 mt-1">
+                            {student.course || "برنامج غير محدد"}
+                          </div>
                         </div>
 
                         <Badge className="bg-white text-slate-700 rounded-full">
@@ -578,7 +662,8 @@ enrollments.forEach((item: any) => {
                           className="h-full rounded-full"
                           style={{
                             width: `${student.progress}%`,
-                            backgroundColor: palette[index % palette.length].text,
+                            backgroundColor:
+                              palette[index % palette.length].text,
                           }}
                         />
                       </div>
@@ -589,6 +674,63 @@ enrollments.forEach((item: any) => {
                 <div className="rounded-3xl bg-slate-50 p-10 text-center text-slate-400">
                   <CheckCircle className="h-12 w-12 mx-auto mb-3 text-slate-300" />
                   لا توجد بيانات تقدم كافية بعد
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border-0 shadow-sm rounded-[2rem]">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-extrabold text-slate-900 mb-1">
+                آخر التسجيلات
+              </h3>
+
+              <p className="text-sm text-slate-500 mb-5">
+                أحدث التحاقات الطلاب بالبرامج.
+              </p>
+
+              {recentEnrollmentRows.length > 0 ? (
+                <div className="space-y-3">
+                  {recentEnrollmentRows.map((row, index) => (
+                    <div
+                      key={`${row.student}-${row.course}-${index}`}
+                      className="rounded-3xl border border-slate-100 bg-slate-50 p-4"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="font-bold text-slate-900">
+                            {row.student}
+                          </div>
+                          <div className="text-sm text-slate-500 mt-1">
+                            {row.course || "برنامج غير محدد"}
+                          </div>
+                          <div className="text-xs text-slate-400 mt-1">
+                            تاريخ التسجيل: {row.date}
+                          </div>
+                        </div>
+
+                        <Badge className="rounded-full bg-white text-slate-700">
+                          {toArabicStatus(row.status)}
+                        </Badge>
+                      </div>
+
+                      <div className="flex items-center gap-3 mt-4">
+                        <div className="flex-1 h-2 bg-white rounded-full overflow-hidden">
+                          <div
+                            className="h-full rounded-full bg-blue-700"
+                            style={{ width: `${row.progress}%` }}
+                          />
+                        </div>
+                        <div className="text-sm font-bold text-blue-700">
+                          {row.progress}%
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="rounded-3xl bg-slate-50 p-10 text-center text-slate-400">
+                  لا توجد تسجيلات حديثة
                 </div>
               )}
             </CardContent>

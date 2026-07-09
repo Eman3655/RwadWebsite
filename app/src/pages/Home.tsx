@@ -19,6 +19,9 @@ import {
   PlayCircle,
   Layers,
   ShieldCheck,
+  Heart,
+  Compass,
+  Sparkles,
 } from "lucide-react";
 
 const levelLabels: Record<string, string> = {
@@ -77,21 +80,21 @@ export default function Home() {
   const statsCards = [
     {
       icon: BookOpen,
-      label: "البرامج التعليمية",
+      label: "برامج تربوية",
       value: stats?.courses ?? 0,
       bg: "#E5F0FF",
       text: "#1E40AF",
     },
     {
       icon: Users,
-      label: "طالب مسجل",
+      label: "طالب مشارك",
       value: stats?.students ?? 0,
       bg: "#EAF7EE",
       text: "#166534",
     },
     {
       icon: FileText,
-      label: "تسجيل في برنامج",
+      label: "تسجيل في البرامج",
       value: stats?.enrollments ?? 0,
       bg: "#FFF4E5",
       text: "#C2410C",
@@ -107,34 +110,40 @@ export default function Home() {
 
   const features = [
     {
-      icon: PlayCircle,
-      title: "دروس واضحة ومنظمة",
-      description: "محتوى مرتب يساعد الطالب على التقدم خطوة بخطوة بدون تشتت.",
+      icon: Heart,
+      title: "معرفة الله",
+      description:
+        "برامج تعين الطالب على معرفة ربه، وفهم آثار الإيمان بأسمائه الحسنى في حياته.",
     },
     {
-      icon: TrendingUp,
-      title: "متابعة التقدم",
-      description: "لوحة خاصة للطالب تعرض مستوى الإنجاز والبرامج الحالية.",
+      icon: Compass,
+      title: "مركزيات الوحي",
+      description:
+        "بناء التصورات والموازين على هدي القرآن الكريم والسنة النبوية.",
     },
     {
       icon: CheckCircle,
-      title: "اختبارات ونتائج",
-      description: "اختبارات بعد الدروس مع عرض النتيجة ومراجعة الإجابات.",
+      title: "العلم والعمل",
+      description:
+        "ربط الدروس بتطبيقات عملية؛ ليصبح العلم سلوكًا يوميًا لا معلومة مجردة.",
     },
     {
-      icon: Award,
-      title: "شهادات إلكترونية",
-      description: "إمكانية إصدار شهادات للطلاب بعد إكمال المتطلبات.",
+      icon: TrendingUp,
+      title: "متابعة تربوية",
+      description:
+        "صفحات خاصة لمتابعة التقدم، والأوراد، والعادات، والإنجاز في البرامج.",
     },
     {
-      icon: Layers,
-      title: "إدارة تعليمية مرنة",
-      description: "تنظيم البرامج والدروس والاختبارات من لوحة تحكم واحدة.",
+      icon: PlayCircle,
+      title: "تعلم تفاعلي",
+      description:
+        "استخدام التقنية والاختبارات والرحلات التعليمية لترسيخ المعاني بطريقة جاذبة.",
     },
     {
       icon: ShieldCheck,
-      title: "تجربة آمنة وسهلة",
-      description: "حسابات طلابية واضحة وصلاحيات مناسبة لكل مستخدم.",
+      title: "بيئة آمنة وهادفة",
+      description:
+        "منصة منظمة تساعد الطالب على التعلم، والمتابعة، وبناء عاداته في مكان واحد.",
     },
   ];
 
@@ -159,9 +168,9 @@ export default function Home() {
                 variants={fadeUp}
                 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight"
               >
-                تعلّم بوضوح مع
+                نبني جيلاً يعرف ربَّه
                 <span className="block text-blue-700 mt-2">
-                  مخيم الرواد
+                  ويعظم وحيه
                 </span>
               </motion.h1>
 
@@ -169,8 +178,9 @@ export default function Home() {
                 variants={fadeUp}
                 className="mt-6 text-lg text-slate-600 leading-8 max-w-xl"
               >
-                منصة تعليمية تساعد الطالب على متابعة البرامج والدروس
-                والاختبارات والشهادات في مكان واحد، بتجربة هادئة ومنظمة.
+                مخيم الرواد منظومة تربوية تهدف إلى بناء الجيل الصاعد على
+                مركزيات الوحي، من خلال برامج علمية متدرجة، وتطبيقات عملية،
+                ومتابعة مستمرة، ووسائل تفاعلية تربط العلم بالعمل.
               </motion.p>
 
               <motion.div
@@ -193,7 +203,7 @@ export default function Home() {
                     variant="outline"
                     className="rounded-2xl px-8 h-14 text-base bg-white/80"
                   >
-                    ابدأ الآن
+                    ابدأ رحلتك
                   </Button>
                 </Link>
               </motion.div>
@@ -228,10 +238,10 @@ export default function Home() {
                     <div className="flex items-center justify-between mb-5">
                       <div>
                         <div className="font-bold text-slate-900">
-                          تقدم الطالب
+                          رحلة الطالب
                         </div>
                         <div className="text-sm text-slate-400 mt-1">
-                          متابعة الإنجاز التعليمي
+                          متابعة التقدم العلمي والتربوي
                         </div>
                       </div>
 
@@ -311,10 +321,11 @@ export default function Home() {
           >
             <div>
               <h2 className="text-3xl font-extrabold text-slate-900">
-                أحدث البرامج
+                البرامج التربوية
               </h2>
               <p className="text-slate-500 mt-2">
-                اختر البرنامج المناسب وابدأ رحلتك التعليمية.
+                اختر برنامجك، وابدأ رحلة تربوية تبني إيمانك، وتضبط موازينك،
+                وتعينك على السير إلى الله.
               </p>
             </div>
 
@@ -368,7 +379,8 @@ export default function Home() {
                       </h3>
 
                       <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-6">
-                        {course.description || "وصف البرنامج غير متوفر حالياً."}
+                        {course.description ||
+                          "برنامج تربوي يعين الطالب على بناء إيمانه ومعرفة طريقه إلى الله."}
                       </p>
 
                       <div className="flex items-center justify-between mt-5 text-sm text-slate-500">
@@ -391,34 +403,31 @@ export default function Home() {
                           </span>
                         </div>
 
-                              <div className="flex items-center gap-1 text-blue-700 font-bold text-sm">
-                                عرض التفاصيل
-                                <ChevronLeft className="h-4 w-4" />
-                              </div>
+                        <div className="flex items-center gap-1 text-blue-700 font-bold text-sm">
+                          عرض التفاصيل
+                          <ChevronLeft className="h-4 w-4" />
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
                 </Link>
               </motion.div>
             ))}
-</motion.div>
+          </motion.div>
 
-<div className="flex justify-center mt-8">
-  <Link to="/courses">
-    <Button
-      variant="outline"
-      className="rounded-2xl px-8"
-    >
-      عرض جميع البرامج
-      <ChevronLeft className="h-4 w-4 mr-2" />
-    </Button>
-  </Link>
-</div>
+          <div className="flex justify-center mt-8">
+            <Link to="/courses">
+              <Button variant="outline" className="rounded-2xl px-8">
+                عرض جميع البرامج
+                <ChevronLeft className="h-4 w-4 mr-2" />
+              </Button>
+            </Link>
+          </div>
 
-{courses.length === 0 && (
-  <Card className="border-0 shadow-sm rounded-3xl">
+          {courses.length === 0 && (
+            <Card className="border-0 shadow-sm rounded-3xl">
               <CardContent className="p-12 text-center text-slate-400">
-                لا توجد برامج متاحة حالياً
+                لا توجد برامج متاحة حاليًا
               </CardContent>
             </Card>
           )}
@@ -437,8 +446,9 @@ export default function Home() {
             <h2 className="text-3xl font-extrabold text-slate-900">
               لماذا مخيم الرواد؟
             </h2>
-            <p className="text-slate-500 mt-3">
-              تجربة تعليمية بسيطة، منظمة، ومناسبة للطلاب.
+            <p className="text-slate-500 mt-3 max-w-2xl mx-auto leading-7">
+              لأن التربية لا تكتمل بالمعلومة وحدها؛ بل تحتاج إلى بناء إيماني،
+              وتطبيق عملي، ومتابعة مستمرة، وبيئة تعين الطالب على الثبات والنمو.
             </p>
           </motion.div>
 
@@ -486,10 +496,11 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4">
           <motion.div variants={cardSoftReveal} className="text-center mb-10">
             <h2 className="text-3xl font-extrabold text-slate-900">
-              ابدأ بخطوات بسيطة
+              رحلتك في مخيم الرواد
             </h2>
-            <p className="text-slate-500 mt-3">
-              تجربة تعليمية واضحة من التسجيل حتى الحصول على الشهادة.
+            <p className="text-slate-500 mt-3 max-w-2xl mx-auto leading-7">
+              رحلة تبدأ بالمعرفة، وتمتد إلى العمل، ثم المتابعة، حتى يصبح ما
+              تتعلمه زادًا لقلبك وسلوكك ورسالتك.
             </p>
           </motion.div>
 
@@ -503,25 +514,27 @@ export default function Home() {
             {[
               {
                 step: "01",
-                title: "أنشئ حسابك",
-                description: "سجّل كطالب وابدأ رحلتك التعليمية خلال دقائق.",
-                icon: Users,
+                title: "اعرف ربك",
+                description:
+                  "ابدأ من الأصول الكبرى: معرفة الله، وتعظيم وحيه، وفهم الغاية من الحياة.",
+                icon: Sparkles,
                 bg: "#E5F0FF",
                 text: "#1E40AF",
               },
               {
                 step: "02",
-                title: "اختر البرنامج",
-                description: "تصفح البرامج المتاحة واختر ما يناسب هدفك.",
+                title: "تدرج في البناء",
+                description:
+                  "انتقل بين برامج تربوية مترابطة تبني التصور، وتصحح الموازين، وتربطك بالوحي.",
                 icon: BookOpen,
                 bg: "#F3E8FF",
                 text: "#7C3AED",
               },
               {
                 step: "03",
-                title: "تابع تقدمك",
+                title: "حوّل العلم إلى عمل",
                 description:
-                  "أكمل الدروس والاختبارات وشاهد شهاداتك من حسابك.",
+                  "تابع تقدمك، وأورادك، واختباراتك، واجعل ما تتعلمه أثرًا ظاهرًا في يومك.",
                 icon: Award,
                 bg: "#EAF7EE",
                 text: "#166534",

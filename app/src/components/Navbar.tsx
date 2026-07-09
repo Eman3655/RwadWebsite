@@ -62,9 +62,12 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <Link to="/" className="flex items-center gap-3 shrink-0">
-            <div className="w-10 h-10 bg-blue-700 rounded-2xl flex items-center justify-center shadow-sm">
-              <GraduationCap className="h-5 w-5 text-white" />
-            </div>
+          <img
+              src="/logo.png"
+              alt="Logo"
+              className="w-10 h-10 rounded-full object-cover"
+            />
+
 
             <div className="leading-tight">
               <div className="text-lg font-extrabold text-slate-900">

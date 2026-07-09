@@ -99,7 +99,27 @@ export const dashboardRouter = createRouter({
       .orderBy(desc(users.createdAt));
   }),
 
+  // كل التسجيلات: تُستخدم لحساب الإحصائيات والرسوم البيانية
   recentEnrollments: adminQuery.query(async () => {
+    const db = getDb();
+
+    return db
+      .select({
+        id: enrollments.id,
+        studentName: users.name,
+        courseTitle: courses.title,
+        status: enrollments.status,
+        progress: enrollments.progress,
+        enrolledAt: enrollments.enrolledAt,
+      })
+      .from(enrollments)
+      .innerJoin(users, eq(enrollments.studentId, users.id))
+      .innerJoin(courses, eq(enrollments.courseId, courses.id))
+      .orderBy(desc(enrollments.enrolledAt));
+  }),
+
+  // آخر 10 تسجيلات فقط: تُستخدم في جدول آخر التسجيلات
+  latestEnrollments: adminQuery.query(async () => {
     const db = getDb();
 
     return db
