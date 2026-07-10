@@ -22,6 +22,10 @@ import {
   Heart,
   Compass,
   Sparkles,
+  BookMarked,
+  ScrollText,
+  Footprints,
+  Scale,
 } from "lucide-react";
 
 const levelLabels: Record<string, string> = {
@@ -41,7 +45,7 @@ const fadeUp: Variants = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.35, ease: "easeOut" },
+    transition: { duration: 0.5, ease: "easeOut" },
   },
 };
 
@@ -50,7 +54,7 @@ const revealSection: Variants = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: "easeOut" },
+    transition: { duration: 0.55, ease: "easeOut" },
   },
 };
 
@@ -58,7 +62,7 @@ const staggerContainer: Variants = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.08,
+      staggerChildren: 0.1,
     },
   },
 };
@@ -68,7 +72,24 @@ const cardSoftReveal: Variants = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.35, ease: "easeOut" },
+    transition: { duration: 0.45, ease: "easeOut" },
+  },
+};
+
+const scienceNodeReveal: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.88,
+    y: 10,
+  },
+  show: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+    },
   },
 };
 
@@ -147,14 +168,98 @@ export default function Home() {
     },
   ];
 
+  const scienceNodes = [
+    {
+      title: "العقيدة",
+      icon: ShieldCheck,
+      position: "top-center",
+      bg: "#E5F0FF",
+      text: "#1E40AF",
+      border: "#B3D4FF",
+    },
+    {
+      title: "التفسير",
+      icon: BookMarked,
+      position: "upper-left",
+      bg: "#F3E8FF",
+      text: "#7C3AED",
+      border: "#D8B4FE",
+    },
+    {
+      title: "الحديث",
+      icon: ScrollText,
+      position: "upper-right",
+      bg: "#FFF4E5",
+      text: "#C2410C",
+      border: "#FFD6B3",
+    },
+    {
+      title: "السيرة",
+      icon: Footprints,
+      position: "lower-left",
+      bg: "#EAF7EE",
+      text: "#166534",
+      border: "#B3E5C1",
+    },
+    {
+      title: "الفقه",
+      icon: Scale,
+      position: "lower-right",
+      bg: "#FFE5EC",
+      text: "#BE185D",
+      border: "#FFADC2",
+    },
+    {
+      title: "التزكية والتربية",
+      icon: Heart,
+      position: "bottom-center",
+      bg: "#E6FFFA",
+      text: "#0F766E",
+      border: "#99F6E4",
+    },
+  ];
+
+  const positionClasses: Record<string, string> = {
+    "top-center": "top-0 left-1/3 -translate-x-1/2",
+    "upper-left": "top-[100px] left-0",
+    "upper-right": "top-[100px] right-0",
+    "lower-left": "bottom-[70px] left-0",
+    "lower-right": "bottom-[70px] right-0",
+    "bottom-center": "bottom-0 left-1/3 -translate-x-1/2",
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
 
       <section className="relative overflow-hidden pt-28 pb-20">
         <div className="absolute inset-0 bg-gradient-to-br from-[#E5F0FF] via-white to-[#F3E8FF]" />
-        <div className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-blue-200/40 blur-3xl" />
-        <div className="absolute top-40 -right-24 h-96 w-96 rounded-full bg-purple-200/40 blur-3xl" />
+
+        <motion.div
+          className="absolute -top-32 -left-24 h-80 w-80 rounded-full bg-blue-200/40 blur-3xl"
+          animate={{
+            x: [0, 25, 0],
+            y: [0, -18, 0],
+          }}
+          transition={{
+            duration: 18,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
+
+        <motion.div
+          className="absolute top-40 -right-24 h-96 w-96 rounded-full bg-purple-200/40 blur-3xl"
+          animate={{
+            x: [0, -20, 0],
+            y: [0, 22, 0],
+          }}
+          transition={{
+            duration: 21,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        />
 
         <motion.div
           initial="hidden"
@@ -168,10 +273,26 @@ export default function Home() {
                 variants={fadeUp}
                 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight"
               >
-                نبني جيلاً يعرف ربَّه
-                <span className="block text-blue-700 mt-2">
+                نبني جيلًا يعرف ربَّه
+
+                <motion.span
+                  className="block text-blue-700 mt-2"
+                  animate={{
+                    opacity: [1, 0.82, 1],
+                    textShadow: [
+                      "0 0 0 rgba(37,99,235,0)",
+                      "0 0 18px rgba(37,99,235,0.22)",
+                      "0 0 0 rgba(37,99,235,0)",
+                    ],
+                  }}
+                  transition={{
+                    duration: 4,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
                   ويعظم وحيه
-                </span>
+                </motion.span>
               </motion.h1>
 
               <motion.p
@@ -209,50 +330,233 @@ export default function Home() {
               </motion.div>
             </div>
 
-            <motion.div variants={fadeUp} className="relative hidden lg:block">
-              <div className="relative bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden">
-                <div className="h-14 bg-slate-50 border-b flex items-center px-5 gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-400" />
-                  <div className="w-3 h-3 rounded-full bg-yellow-400" />
-                  <div className="w-3 h-3 rounded-full bg-green-400" />
-                </div>
+            <motion.div
+              variants={fadeUp}
+              className="relative hidden lg:flex items-center justify-center min-h-[460px]"
+            >
+              <div className="relative w-full max-w-[560px] h-[440px]">
+                <svg
+                  viewBox="0 0 560 440"
+                  className="absolute inset-0 w-full h-full"
+                  aria-hidden="true"
+                >
+                  <motion.path
+                    d="M280 74 C280 115 280 145 280 178"
+                    fill="none"
+                    stroke="#BFDBFE"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.35 }}
+                  />
 
-                <div className="p-6 bg-gradient-to-br from-slate-50 to-blue-50">
-                  <div className="grid grid-cols-2 gap-4 mb-5">
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border">
-                      <div className="text-slate-400 text-sm">البرامج</div>
-                      <div className="text-3xl font-extrabold mt-2 text-slate-900">
-                        {stats?.courses ?? 0}
-                      </div>
-                    </div>
+                  <motion.path
+                    d="M246 192 C190 170 145 150 102 134"
+                    fill="none"
+                    stroke="#DDD6FE"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                  />
 
-                    <div className="bg-white rounded-2xl p-5 shadow-sm border">
-                      <div className="text-slate-400 text-sm">الطلاب</div>
-                      <div className="text-3xl font-extrabold mt-2 text-slate-900">
-                        {stats?.students ?? 0}
-                      </div>
-                    </div>
-                  </div>
+                  <motion.path
+                    d="M314 192 C370 170 415 150 458 134"
+                    fill="none"
+                    stroke="#FED7AA"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.65 }}
+                  />
 
-                  <div className="bg-white rounded-3xl border shadow-sm p-5">
-                    <div className="flex items-center justify-between mb-5">
-                      <div>
-                        <div className="font-bold text-slate-900">
-                          رحلة الطالب
+                  <motion.path
+                    d="M244 228 C190 250 145 280 102 322"
+                    fill="none"
+                    stroke="#BBF7D0"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.8 }}
+                  />
+
+                  <motion.path
+                    d="M316 228 C370 250 415 280 458 322"
+                    fill="none"
+                    stroke="#FBCFE8"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1, delay: 0.95 }}
+                  />
+
+                  <motion.path
+                    d="M280 250 C280 300 280 335 280 378"
+                    fill="none"
+                    stroke="#99F6E4"
+                    strokeWidth="3"
+                    strokeLinecap="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1, delay: 1.1 }}
+                  />
+                </svg>
+
+<div
+  className="absolute top-1/2 z-20"
+  style={{
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+  }}
+>
+  <motion.div
+    initial={{ opacity: 0, scale: 0.75, rotate: -4 }}
+    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+    transition={{
+      duration: 0.7,
+      delay: 0.2,
+      ease: "easeOut",
+    }}
+  >
+    <motion.div
+      className="relative w-32 h-32 rounded-[2.25rem] bg-white border border-blue-100 shadow-xl flex flex-col items-center justify-center"
+      animate={{
+        y: [0, -5, 0],
+      }}
+      transition={{
+        duration: 5,
+        repeat: Infinity,
+        ease: "easeInOut",
+      }}
+    >
+      <motion.div
+        className="absolute inset-3 rounded-[1.75rem] bg-gradient-to-br from-blue-50 to-purple-50"
+        animate={{
+          boxShadow: [
+            "0 0 0 rgba(59,130,246,0)",
+            "0 0 26px rgba(59,130,246,0.2)",
+            "0 0 0 rgba(59,130,246,0)",
+          ],
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+      />
+
+      <BookOpen className="relative z-10 h-12 w-12 text-blue-700" />
+
+      <span className="relative z-10 mt-2 text-sm font-extrabold text-slate-800">
+        الوحي
+      </span>
+    </motion.div>
+  </motion.div>
+</div>
+
+                <div
+  className="absolute top-1/2 z-10"
+  style={{
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+  }}
+>
+  <motion.div
+    className="w-44 h-44 rounded-full bg-blue-200/20 blur-2xl"
+    animate={{
+      scale: [1, 1.15, 1],
+      opacity: [0.4, 0.68, 0.4],
+    }}
+    transition={{
+      duration: 4,
+      repeat: Infinity,
+      ease: "easeInOut",
+    }}
+  />
+</div>
+
+                {scienceNodes.map((science, index) => {
+                  const Icon = science.icon;
+
+                  return (
+                    <motion.div
+                      key={science.title}
+                      variants={scienceNodeReveal}
+                      initial="hidden"
+                      animate="show"
+                      transition={{ delay: 0.5 + index * 0.15 }}
+                      className={`absolute z-30 ${
+                        positionClasses[science.position]
+                      }`}
+                    >
+                      <motion.div
+                        className="w-[175px] rounded-3xl border bg-white/95 backdrop-blur px-4 py-3 shadow-md"
+                        style={{
+                          borderColor: science.border,
+                        }}
+                        whileHover={{
+                          y: -5,
+                          scale: 1.025,
+                          boxShadow: "0 16px 35px rgba(15,23,42,0.12)",
+                        }}
+                        transition={{ duration: 0.22 }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0"
+                            style={{
+                              backgroundColor: science.bg,
+                              color: science.text,
+                            }}
+                          >
+                            <Icon className="h-5 w-5" />
+                          </div>
+
+                          <span className="text-sm font-bold text-slate-800 whitespace-nowrap">
+                            {science.title}
+                          </span>
                         </div>
-                        <div className="text-sm text-slate-400 mt-1">
-                          متابعة التقدم العلمي والتربوي
-                        </div>
-                      </div>
+                      </motion.div>
+                    </motion.div>
+                  );
+                })}
 
-                      <div className="text-blue-700 font-bold">78%</div>
-                    </div>
+                <motion.div
+                  className="absolute top-[55px] left-[78px] text-blue-300"
+                  animate={{
+                    y: [0, -7, 0],
+                    rotate: [0, 7, 0],
+                    opacity: [0.35, 0.85, 0.35],
+                  }}
+                  transition={{
+                    duration: 5,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <Sparkles className="h-5 w-5" />
+                </motion.div>
 
-                    <div className="w-full h-3 rounded-full bg-slate-100 overflow-hidden">
-                      <div className="h-full w-[78%] bg-gradient-to-r from-blue-600 to-indigo-600 rounded-full" />
-                    </div>
-                  </div>
-                </div>
+                <motion.div
+                  className="absolute bottom-[95px] right-[72px] text-purple-300"
+                  animate={{
+                    y: [0, 7, 0],
+                    rotate: [0, -7, 0],
+                    opacity: [0.35, 0.8, 0.35],
+                  }}
+                  transition={{
+                    duration: 6,
+                    repeat: Infinity,
+                    ease: "easeInOut",
+                  }}
+                >
+                  <Sparkles className="h-5 w-5" />
+                </motion.div>
               </div>
             </motion.div>
           </div>
@@ -323,6 +627,7 @@ export default function Home() {
               <h2 className="text-3xl font-extrabold text-slate-900">
                 البرامج التربوية
               </h2>
+
               <p className="text-slate-500 mt-2">
                 اختر برنامجك، وابدأ رحلة تربوية تبني إيمانك، وتضبط موازينك،
                 وتعينك على السير إلى الله.
@@ -446,6 +751,7 @@ export default function Home() {
             <h2 className="text-3xl font-extrabold text-slate-900">
               لماذا مخيم الرواد؟
             </h2>
+
             <p className="text-slate-500 mt-3 max-w-2xl mx-auto leading-7">
               لأن التربية لا تكتمل بالمعلومة وحدها؛ بل تحتاج إلى بناء إيماني،
               وتطبيق عملي، ومتابعة مستمرة، وبيئة تعين الطالب على الثبات والنمو.
@@ -466,6 +772,10 @@ export default function Home() {
                 <motion.div
                   key={feature.title}
                   variants={cardSoftReveal}
+                  whileHover={{
+                    y: -5,
+                    boxShadow: "0 15px 35px rgba(15,23,42,0.09)",
+                  }}
                   className="rounded-3xl bg-slate-50 border border-slate-100 p-6 hover:bg-blue-50 transition"
                 >
                   <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 text-blue-700">
@@ -498,6 +808,7 @@ export default function Home() {
             <h2 className="text-3xl font-extrabold text-slate-900">
               رحلتك في مخيم الرواد
             </h2>
+
             <p className="text-slate-500 mt-3 max-w-2xl mx-auto leading-7">
               رحلة تبدأ بالمعرفة، وتمتد إلى العمل، ثم المتابعة، حتى يصبح ما
               تتعلمه زادًا لقلبك وسلوكك ورسالتك.
@@ -546,7 +857,11 @@ export default function Home() {
                 <motion.div
                   key={item.step}
                   variants={cardSoftReveal}
-                  className="rounded-[2rem] border border-slate-100 bg-slate-50 p-6 hover:bg-white hover:shadow-lg transition"
+                  whileHover={{
+                    y: -5,
+                    boxShadow: "0 15px 35px rgba(15,23,42,0.09)",
+                  }}
+                  className="rounded-[2rem] border border-slate-100 bg-slate-50 p-6 hover:bg-white transition"
                 >
                   <div
                     className="w-14 h-14 rounded-2xl flex items-center justify-center mb-5"
